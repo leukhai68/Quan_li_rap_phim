@@ -501,18 +501,21 @@ button { cursor: pointer; border: none; outline: none; font-family: inherit; }
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .page-wrapper { gap: 14px; padding: 24px 12px; }
   .side-banner { width: 140px; }
   .phim-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
 }
 @media (max-width: 992px) {
-  .side-banner--left, .side-banner--right { display: none; }
-  .page-wrapper { padding: 24px 16px; }
+  .page-wrapper { gap: 10px; padding: 20px 10px; }
+  .side-banner { width: 120px; }
+  .phim-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 }
 @media (max-width: 768px) {
+  .side-banner--left, .side-banner--right { display: none; }
   .hero-title { font-size: 1.6rem; }
   .main-nav { display: none; }
+  .page-wrapper { padding: 16px 12px; }
   .phim-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
   .footer-inner { grid-template-columns: 1fr 1fr; }
   .schedule-card { flex-wrap: wrap; }
