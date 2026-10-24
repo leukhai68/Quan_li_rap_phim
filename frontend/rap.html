@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hệ thống rạp - PTIT Cinema</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .cinema-banner {
+      background: linear-gradient(135deg, #003580 0%, #0054a6 60%, #0077cc 100%);
+      color: #fff;
+      padding: 48px 0;
+      text-align: center;
+    }
+    .cinema-banner h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; }
+    .cinema-banner p { font-size: 1rem; color: rgba(255,255,255,.85); max-width: 600px; margin: 0 auto; }
+    
+    .cinema-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin: 36px 0;
+    }
+    .cinema-card {
+      background: #fff;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform var(--transition);
+      border-top: 4px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+    }
+    .cinema-card:hover { transform: translateY(-4px); }
+    .cinema-img {
+      height: 180px;
+      background: linear-gradient(135deg, #1a237e, #0054a6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 3rem;
+    }
+    .cinema-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .cinema-name { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+    .cinema-info { font-size: .875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; flex: 1; }
+    .cinema-info p { margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
+    .cinema-info i { color: var(--primary); margin-top: 4px; }
+    .cinema-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: .875rem;
+      font-weight: 700;
+      text-align: center;
+      display: block;
+      transition: var(--transition);
+    }
+    .cinema-btn:hover { background: var(--primary-dark); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-top">
+      <div class="container header-inner">
+        <!-- Logo -->
+        <a href="index.html" class="logo">
+          <div class="logo-box">
+            <span class="logo-b">P</span>
+            <div class="logo-text">
+              <span class="logo-main">PTIT</span>
+              <span class="logo-sub">CINEMA</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Main Nav -->
+        <nav class="main-nav">
+          <a href="index.html#schedule-section" class="nav-link">
+            <i class="fa-solid fa-clapperboard"></i> Lịch chiếu theo rạp
+          </a>
+          <a href="phim.html" class="nav-link">
+            <i class="fa-solid fa-film"></i> Phim
+          </a>
+          <a href="rap.html" class="nav-link active">
+            <i class="fa-solid fa-building"></i> Rạp
+          </a>
+          <a href="giave.html" class="nav-link">
+            <i class="fa-solid fa-ticket"></i> Giá vé
+          </a>
+          <a href="tintuc.html" class="nav-link">
+            <i class="fa-solid fa-newspaper"></i> Tin tức
+          </a>
+          <a href="booking-history.html" class="nav-link">
+            <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đặt vé
+          </a>
+        </nav>
+
+        <!-- Right actions -->
+        <div class="header-actions" id="header-actions">
+          <button class="btn-login" onclick="window.location.href='login.html'">
+            <i class="fa-regular fa-user"></i> Đăng nhập
+          </button>
+          <button class="btn-register" onclick="window.location.href='register.html'">Đăng ký</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BANNER -->
+  <div class="cinema-banner">
+    <div class="container">
+      <h1>Hệ Thống Cụm Rạp PTIT Cinema</h1>
+      <p>Trang bị công nghệ trình chiếu hiện đại, âm thanh Dolby 7.1 & Dolby Atmos, ghế bọc da cao cấp chuẩn quốc tế.</p>
+    </div>
+  </div>
+
+  <!-- MAIN LIST -->
+  <div class="container" style="padding-top: 24px; padding-bottom: 60px;">
+    <div class="cinema-grid">
+      <!-- Rạp 1 -->
+      <div class="cinema-card">
+        <div class="cinema-img"><i class="fa-solid fa-film"></i></div>
+        <div class="cinema-body">
+          <div class="cinema-name">PTIT Cinema Hà Đông (Trụ sở)</div>
+          <div class="cinema-info">
+            <p><i class="fa-solid fa-location-dot"></i> Km10 Đường Nguyễn Trãi, Quận Hà Đông, Hà Nội</p>
+            <p><i class="fa-solid fa-door-open"></i> 6 phòng chiếu (2 phòng 3D, 1 phòng IMAX)</p>
+            <p><i class="fa-solid fa-phone"></i> 1900 6868 11 (Máy lẻ 101)</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <a href="index.html#schedule-section" class="cinema-btn" style="flex:1;">
+              <i class="fa-solid fa-calendar-check"></i> Lịch chiếu
+            </a>
+            <a href="booking.html?cinema=PTIT Cinema Hà Đông" class="cinema-btn" style="flex:1; background:var(--accent);">
+              <i class="fa-solid fa-ticket"></i> Đặt vé
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rạp 2 -->
+      <div class="cinema-card">
+        <div class="cinema-img" style="background:linear-gradient(135deg, #004d99, #0077cc);"><i class="fa-solid fa-clapperboard"></i></div>
+        <div class="cinema-body">
+          <div class="cinema-name">PTIT Cinema Cầu Giấy</div>
+          <div class="cinema-info">
+            <p><i class="fa-solid fa-location-dot"></i> Số 122 Xuân Thủy, Quận Cầu Giấy, Hà Nội</p>
+            <p><i class="fa-solid fa-door-open"></i> 5 phòng chiếu hiện đại tiêu chuẩn quốc tế</p>
+            <p><i class="fa-solid fa-phone"></i> 1900 6868 11 (Máy lẻ 102)</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <a href="index.html#schedule-section" class="cinema-btn" style="flex:1;">
+              <i class="fa-solid fa-calendar-check"></i> Lịch chiếu
+            </a>
+            <a href="booking.html?cinema=PTIT Cinema Cầu Giấy" class="cinema-btn" style="flex:1; background:var(--accent);">
+              <i class="fa-solid fa-ticket"></i> Đặt vé
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rạp 3 -->
+      <div class="cinema-card">
+        <div class="cinema-img" style="background:linear-gradient(135deg, #1565c0, #0d47a1);"><i class="fa-solid fa-video"></i></div>
+        <div class="cinema-body">
+          <div class="cinema-name">PTIT Cinema Hai Bà Trưng</div>
+          <div class="cinema-info">
+            <p><i class="fa-solid fa-location-dot"></i> Số 456 Bạch Mai, Quận Hai Bà Trưng, Hà Nội</p>
+            <p><i class="fa-solid fa-door-open"></i> 4 phòng chiếu máy chiếu 4K Laser siêu sắc nét</p>
+            <p><i class="fa-solid fa-phone"></i> 1900 6868 11 (Máy lẻ 103)</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <a href="index.html#schedule-section" class="cinema-btn" style="flex:1;">
+              <i class="fa-solid fa-calendar-check"></i> Lịch chiếu
+            </a>
+            <a href="booking.html?cinema=PTIT Cinema Hai Bà Trưng" class="cinema-btn" style="flex:1; background:var(--accent);">
+              <i class="fa-solid fa-ticket"></i> Đặt vé
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rạp 4 -->
+      <div class="cinema-card">
+        <div class="cinema-img" style="background:linear-gradient(135deg, #002f6c, #0054a6);"><i class="fa-solid fa-star"></i></div>
+        <div class="cinema-body">
+          <div class="cinema-name">PTIT Cinema TP. Hồ Chí Minh</div>
+          <div class="cinema-info">
+            <p><i class="fa-solid fa-location-dot"></i> Đường Man Thiện, Phường Hiệp Phú, TP. Thủ Đức, TP.HCM</p>
+            <p><i class="fa-solid fa-door-open"></i> 6 phòng chiếu, hệ thống ghế đôi VIP Sweetbox</p>
+            <p><i class="fa-solid fa-phone"></i> 1900 6868 11 (Máy lẻ 201)</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <a href="index.html#schedule-section" class="cinema-btn" style="flex:1;">
+              <i class="fa-solid fa-calendar-check"></i> Lịch chiếu
+            </a>
+            <a href="booking.html?cinema=PTIT Cinema TP. Hồ Chí Minh" class="cinema-btn" style="flex:1; background:var(--accent);">
+              <i class="fa-solid fa-ticket"></i> Đặt vé
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-col">
+        <div class="logo-box" style="margin-bottom:12px;">
+          <span class="logo-b" style="font-size:2rem;">P</span>
+          <div class="logo-text">
+            <span class="logo-main">PTIT</span>
+            <span class="logo-sub">CINEMA</span>
+          </div>
+        </div>
+        <p style="color:#aaa;font-size:13px;">Hệ thống rạp chiếu phim hiện đại hàng đầu Việt Nam.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Về chúng tôi</h4>
+        <ul>
+          <li><a href="tintuc.html">Giới thiệu</a></li>
+          <li><a href="rap.html">Hệ thống rạp</a></li>
+          <li><a href="giave.html">Giá vé</a></li>
+          <li><a href="tintuc.html">Tin tức & Khuyến mãi</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Hỗ trợ</h4>
+        <ul>
+          <li><a href="#">Câu hỏi thường gặp</a></li>
+          <li><a href="#">Điều khoản sử dụng</a></li>
+          <li><a href="#">Chính sách bảo mật</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Liên hệ</h4>
+        <p style="color:#aaa;font-size:13px;"><i class="fa-solid fa-phone"></i> 1900 6868 11</p>
+        <p style="color:#aaa;font-size:13px;"><i class="fa-solid fa-envelope"></i> support@ptitcinema.vn</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 PTIT Cinema. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

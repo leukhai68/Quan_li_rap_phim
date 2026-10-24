@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Đăng nhập - PTIT Cinema</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .login-page-bg {
+      min-height: calc(100vh - 64px - 80px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      background: linear-gradient(135deg, #003580 0%, #0054a6 50%, #0077cc 100%);
+    }
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    .login-logo { text-align: center; margin-bottom: 24px; }
+    .login-title { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+    .login-sub   { font-size: .85rem; color: var(--text-muted); }
+    .form-group  { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: .85rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .form-group input { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: .9rem; outline: none; transition: .2s; }
+    .form-group input:focus { border-color: var(--primary); }
+    .btn-submit { width: 100%; background: var(--primary); color: #fff; padding: 14px; border-radius: 10px; font-size: 1rem; font-weight: 700; transition: .2s; margin-top: 8px; }
+    .btn-submit:hover { background: var(--primary-dark); }
+    .login-footer { text-align: center; margin-top: 20px; font-size: .85rem; color: var(--text-muted); }
+    .login-footer a { color: var(--primary); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-top">
+      <div class="container header-inner">
+        <!-- Logo -->
+        <a href="index.html" class="logo">
+          <div class="logo-box">
+            <span class="logo-b">P</span>
+            <div class="logo-text">
+              <span class="logo-main">PTIT</span>
+              <span class="logo-sub">CINEMA</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Main Nav -->
+        <nav class="main-nav">
+          <a href="index.html#schedule-section" class="nav-link">
+            <i class="fa-solid fa-clapperboard"></i> Lịch chiếu theo rạp
+          </a>
+          <a href="phim.html" class="nav-link">
+            <i class="fa-solid fa-film"></i> Phim
+          </a>
+          <a href="rap.html" class="nav-link">
+            <i class="fa-solid fa-building"></i> Rạp
+          </a>
+          <a href="giave.html" class="nav-link">
+            <i class="fa-solid fa-ticket"></i> Giá vé
+          </a>
+          <a href="tintuc.html" class="nav-link">
+            <i class="fa-solid fa-newspaper"></i> Tin tức
+          </a>
+        </nav>
+
+        <!-- Right actions -->
+        <div class="header-actions">
+          <button class="btn-login active" style="background:rgba(255,255,255,.18);" onclick="window.location.href='login.html'">
+            <i class="fa-regular fa-user"></i> Đăng nhập
+          </button>
+          <button class="btn-register" onclick="window.location.href='register.html'">Đăng ký</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- LOGIN CONTAINER -->
+  <div class="login-page-bg">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-box" style="justify-content:center;margin-bottom:12px;">
+          <span class="logo-b">P</span>
+          <div class="logo-text">
+            <span class="logo-main" style="color:var(--primary);">PTIT</span>
+            <span class="logo-sub" style="color:var(--text-muted);letter-spacing:3px;">CINEMA</span>
+          </div>
+        </div>
+        <div class="login-title">Chào mừng trở lại!</div>
+        <div class="login-sub">Đăng nhập để đặt vé và nhận ưu đãi</div>
+      </div>
+      <div id="login-error" style="display:none; background:#fee2e2; border:1px solid #ef4444; color:#b91c1c; padding:10px 14px; border-radius:8px; font-size:.85rem; margin-bottom:16px;"></div>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Email, số điện thoại hoặc Mã NV</label>
+          <input type="text" id="login-account" placeholder="an@example.com hoặc SĐT/Mã NV" required/>
+        </div>
+        <div class="form-group">
+          <label>Mật khẩu</label>
+          <input type="password" id="login-password" placeholder="Nhập mật khẩu..." required/>
+        </div>
+        <button class="btn-submit" id="btn-login-submit" type="submit">
+          <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập
+        </button>
+      </form>
+
+      <!-- Quick credentials helper -->
+      <div style="margin-top:20px; padding:12px; background:#f0f7ff; border:1px dashed #0054a6; border-radius:8px; font-size:.8rem;">
+        <strong style="color:var(--primary);display:block;margin-bottom:6px;"><i class="fa-solid fa-key"></i> Tài khoản mẫu thử nghiệm:</strong>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span>👤 Khách hàng: <code>an@example.com</code> / <code>123456</code></span>
+          <a href="#" onclick="fillAccount('an@example.com', '123456'); return false;" style="color:var(--primary);font-weight:700;">Điền ngay</a>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span>👮 Nhân viên soát vé: <code>NV002</code> / <code>123456</code></span>
+          <a href="#" onclick="fillAccount('NV002', '123456'); return false;" style="color:var(--primary);font-weight:700;">Điền ngay</a>
+        </div>
+      </div>
+
+      <div class="login-footer">
+        Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
+        &nbsp;|&nbsp; <a href="index.html">← Trang chủ</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-bottom">
+      <p>© 2026 PTIT Cinema. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    function fillAccount(acc, pass) {
+      document.getElementById('login-account').value = acc;
+      document.getElementById('login-password').value = pass;
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const account = document.getElementById('login-account').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const errBox = document.getElementById('login-error');
+      const submitBtn = document.getElementById('btn-login-submit');
+
+      errBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang đăng nhập...';
+
+      try {
+        const res = await Api.login(account, password);
+        const user = res.user;
+        const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
+
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+        } else if (user.role === 'nhan_vien') {
+          window.location.href = 'checkin.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+      } catch (err) {
+        errBox.textContent = err.message || 'Đăng nhập không thành công!';
+        errBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Đăng nhập';
+      }
+    }
+  </script>
+</body>
+</html>

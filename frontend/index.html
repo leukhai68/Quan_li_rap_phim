@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PTIT Cinema - Rạp chiếu phim</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════ HEADER ════════════════════════════════════════ -->
+  <header class="header">
+    <div class="header-top">
+      <div class="container header-inner">
+        <!-- Logo -->
+        <a href="index.html" class="logo">
+          <div class="logo-box">
+            <span class="logo-b">P</span>
+            <div class="logo-text">
+              <span class="logo-main">PTIT</span>
+              <span class="logo-sub">CINEMA</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Main Nav -->
+        <nav class="main-nav">
+          <a href="#schedule-section" class="nav-link active">
+            <i class="fa-solid fa-clapperboard"></i> Lịch chiếu theo rạp
+          </a>
+          <a href="phim.html" class="nav-link">
+            <i class="fa-solid fa-film"></i> Phim
+          </a>
+          <a href="rap.html" class="nav-link">
+            <i class="fa-solid fa-building"></i> Rạp
+          </a>
+          <a href="giave.html" class="nav-link">
+            <i class="fa-solid fa-ticket"></i> Giá vé
+          </a>
+          <a href="tintuc.html" class="nav-link">
+            <i class="fa-solid fa-newspaper"></i> Tin tức
+          </a>
+          <a href="booking-history.html" class="nav-link">
+            <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đặt vé
+          </a>
+        </nav>
+
+        <!-- // FIX: Thêm id="header-actions" để JS dễ dàng cập nhật trạng thái đăng nhập -->
+        <div class="header-actions" id="header-actions">
+          <button class="btn-login" onclick="window.location.href='login.html'">
+            <i class="fa-regular fa-user"></i> Đăng nhập
+          </button>
+          <button class="btn-register" onclick="window.location.href='register.html'">Đăng ký</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════════ HERO BANNER ════════════════════════════════════════ -->
+  <section class="hero-banner">
+    <div class="hero-slide active" style="background: linear-gradient(135deg, #003580 0%, #0054a6 50%, #0077cc 100%);">
+      <div class="hero-content container">
+        <div class="hero-badge">🎬 Đang chiếu</div>
+        <h1 class="hero-title">Trải nghiệm điện ảnh<br/><span>đỉnh cao tại PTIT Cinema</span></h1>
+        <p class="hero-desc">Hệ thống rạp chiếu phim hiện đại với âm thanh Dolby Atmos & màn hình 4K</p>
+        <!-- // FIX: Nút 'Đặt vé ngay' trên Hero banner điều hướng tới booking.html -->
+        <a href="booking.html" class="btn-hero">Đặt vé ngay →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════ MAIN LAYOUT WITH SIDE BANNERS ════════════════════════════════════════ -->
+  <div class="page-wrapper container">
+
+    <!-- LEFT BANNER -->
+    <aside class="side-banner side-banner--left">
+      <div class="side-ad">
+        <div class="side-ad__badge">HOT</div>
+        <img src="https://placehold.co/160x600/0054a6/ffffff?text=PTIT+CINEMA%0ACombo+%0ABắp+%2B+Nước%0A45.000đ" alt="Quảng cáo trái" class="side-ad__img" />
+        <div class="side-ad__cta">Mua ngay</div>
+      </div>
+      <div class="side-ad" style="margin-top:16px;">
+        <img src="https://placehold.co/160x250/003580/ffffff?text=🎬+IMAX%0ATrải+nghiệm%0AÁ+Đây+Rồi!" alt="Quảng cáo IMAX" class="side-ad__img" />
+      </div>
+    </aside>
+
+    <!-- CENTER CONTENT -->
+    <main class="main-content">
+
+      <!-- Tab phim -->
+      <section class="phim-section">
+        <div class="section-tabs">
+          <button class="tab-btn active" data-tab="dang-chieu">
+            <i class="fa-solid fa-circle-play"></i> Đang chiếu
+          </button>
+          <button class="tab-btn" data-tab="sap-chieu">
+            <i class="fa-solid fa-clock"></i> Sắp chiếu
+          </button>
+        </div>
+
+        <!-- Spinner -->
+        <div id="loading-spinner" class="spinner-wrap">
+          <div class="spinner"></div>
+          <p>Đang tải dữ liệu...</p>
+        </div>
+
+        <!-- Error -->
+        <div id="error-msg" class="error-msg" style="display:none"></div>
+
+        <!-- Grid phim -->
+        <div id="phim-grid" class="phim-grid" style="display:none"></div>
+      </section>
+
+      <!-- Lịch chiếu hôm nay -->
+      <section id="schedule-section" class="schedule-section" style="margin-top:40px;">
+        <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> Lịch chiếu hôm nay</h2>
+        <div id="schedule-loading" class="spinner-wrap">
+          <div class="spinner"></div>
+        </div>
+        <div id="schedule-list" class="schedule-list" style="display:none"></div>
+      </section>
+
+    </main>
+
+    <!-- RIGHT BANNER -->
+    <aside class="side-banner side-banner--right">
+      <div class="side-ad">
+        <div class="side-ad__badge" style="background:#e53935;">MỚI</div>
+        <img src="https://placehold.co/160x600/1a237e/ffffff?text=THÀNH+VIÊN%0APTIT+Plus%0A%0AƯu+đãi%0A20%25%0Amỗi+tuần" alt="Quảng cáo thành viên" class="side-ad__img" />
+        <div class="side-ad__cta" style="background:#e53935;" onclick="window.location.href='register.html'">Đăng ký</div>
+      </div>
+      <div class="side-ad" style="margin-top:16px;">
+        <img src="anh_video/snackcombodoi.jpg" alt="Quảng cáo Snack Combo Đôi" class="side-ad__img" style="object-fit:cover;" onerror="this.src='https://placehold.co/160x250/004d99/ffffff?text=🍿+Snack%0ACombo+Đôi%0A85.000đ';" />
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ════════════════════════════════════════ FOOTER ════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-col">
+        <div class="logo-box" style="margin-bottom:12px;">
+          <span class="logo-b" style="font-size:2rem;">P</span>
+          <div class="logo-text">
+            <span class="logo-main">PTIT</span>
+            <span class="logo-sub">CINEMA</span>
+          </div>
+        </div>
+        <p style="color:#aaa;font-size:13px;">Hệ thống rạp chiếu phim hiện đại hàng đầu Việt Nam.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Về chúng tôi</h4>
+        <ul>
+          <li><a href="tintuc.html">Giới thiệu</a></li>
+          <li><a href="rap.html">Hệ thống rạp</a></li>
+          <li><a href="giave.html">Giá vé</a></li>
+          <li><a href="tintuc.html">Tin tức & Khuyến mãi</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Hỗ trợ</h4>
+        <ul>
+          <li><a href="#">Câu hỏi thường gặp</a></li>
+          <li><a href="#">Điều khoản sử dụng</a></li>
+          <li><a href="#">Chính sách bảo mật</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Liên hệ</h4>
+        <p style="color:#aaa;font-size:13px;"><i class="fa-solid fa-phone"></i> 1900 6868 11</p>
+        <p style="color:#aaa;font-size:13px;"><i class="fa-solid fa-envelope"></i> support@ptitcinema.vn</p>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-youtube"></i></a>
+          <a href="#"><i class="fab fa-tiktok"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 PTIT Cinema. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lịch sử đặt vé - PTIT Cinema</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .history-page { padding: 32px 0 60px; }
+    
+    .history-header {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .history-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .history-subtitle { font-size: .875rem; color: var(--text-muted); }
+
+    /* Tabs */
+    .history-tabs {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+    .h-tab-btn {
+      padding: 10px 20px;
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: .2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .h-tab-btn:hover { color: var(--primary); }
+    .h-tab-btn.active {
+      color: var(--primary);
+    }
+    .h-tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0; right: 0;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* Filters Bar */
+    .filter-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 120px 100px;
+      gap: 14px;
+      align-items: flex-end;
+    }
+    .filter-group label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .filter-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .875rem;
+      outline: none;
+      transition: .2s;
+    }
+    .filter-input:focus { border-color: var(--primary); }
+    .btn-filter {
+      background: var(--primary);
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: .875rem;
+      transition: .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-filter:hover { background: var(--primary-dark); }
+    .btn-reset {
+      background: #f1f5f9;
+      color: var(--text-muted);
+      border: 1.5px solid var(--border);
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: .875rem;
+      transition: .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-reset:hover { background: #e2e8f0; color: var(--text); }
+
+    /* Booking Cards List */
+    .booking-list { display: flex; flex-direction: column; gap: 20px; }
+    
+    .b-card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: .2s;
+    }
+    .b-card:hover { box-shadow: 0 8px 30px rgba(0,84,166,.16); border-color: #cbd5e1; }
+
+    .b-card-header {
+      background: #f8fafc;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      font-size: .85rem;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .b-code { font-weight: 800; color: var(--primary); font-size: .95rem; }
+    .b-date { color: var(--text-muted); }
+
+    .b-card-body {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 110px 1fr 220px;
+      gap: 20px;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .b-card-body { grid-template-columns: 1fr; }
+      .filter-grid { grid-template-columns: 1fr; }
+    }
+
+    .b-poster {
+      width: 110px;
+      height: 155px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    }
+    .b-movie-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .b-info-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .875rem;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .b-info-row i { width: 18px; color: var(--primary); text-align: center; }
+
+    .b-card-right {
+      border-left: 1.5px dashed var(--border);
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    @media (max-width: 768px) {
+      .b-card-right { border-left: none; padding-left: 0; align-items: flex-start; border-top: 1px dashed var(--border); padding-top: 16px; }
+    }
+
+    .b-total-label { font-size: .8rem; color: var(--text-muted); }
+    .b-total-val { font-size: 1.35rem; font-weight: 900; color: #e53935; }
+    
+    .btn-detail {
+      background: #f0f7ff;
+      color: var(--primary);
+      border: 1.5px solid #0054a6;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 700;
+      transition: .2s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .btn-detail:hover { background: var(--primary); color: #fff; }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .badge-paid { background: #dcfce7; color: #166534; }
+    .badge-unpaid { background: #fef3c7; color: #92400e; }
+    .badge-cancelled { background: #fee2e2; color: #991b1b; }
+    .badge-checkin { background: #e0f2fe; color: #0369a1; }
+    .badge-unused { background: #ede9fe; color: #6d28d9; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,.65);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: 0 25px 60px rgba(0,0,0,.3);
+      position: relative;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 20px; right: 20px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .modal-close-btn:hover { background: #fee2e2; color: #ef4444; }
+
+    /* Ticket card inside modal */
+    .ticket-visual-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .ticket-visual-card {
+      background: linear-gradient(135deg, #f8fafc, #edf2f7);
+      border: 1.5px dashed var(--primary);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+    .ticket-seat-badge {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.1rem;
+      padding: 6px 14px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    /* Snacks table */
+    .snack-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: .85rem;
+    }
+    .snack-table th { background: #f1f5f9; text-align: left; padding: 8px 10px; color: var(--text); }
+    .snack-table td { padding: 10px; border-bottom: 1px solid var(--border); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .empty-icon {
+      font-size: 3.5rem;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+    }
+
+    /* Pagination */
+    .pagination-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 30px;
+    }
+    .page-btn {
+      min-width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: .2s;
+    }
+    .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+    .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .page-btn:disabled { opacity: .5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-top">
+      <div class="container header-inner">
+        <a href="index.html" class="logo">
+          <div class="logo-box">
+            <span class="logo-b">P</span>
+            <div class="logo-text">
+              <span class="logo-main">PTIT</span>
+              <span class="logo-sub">CINEMA</span>
+            </div>
+          </div>
+        </a>
+
+        <nav class="main-nav">
+          <a href="index.html#schedule-section" class="nav-link"><i class="fa-solid fa-clapperboard"></i> Lịch chiếu theo rạp</a>
+          <a href="phim.html" class="nav-link"><i class="fa-solid fa-film"></i> Phim</a>
+          <a href="rap.html" class="nav-link"><i class="fa-solid fa-building"></i> Rạp</a>
+          <a href="giave.html" class="nav-link"><i class="fa-solid fa-ticket"></i> Giá vé</a>
+          <a href="booking-history.html" class="nav-link active"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đặt vé</a>
+        </nav>
+
+        <div class="header-actions" id="header-actions">
+          <button class="btn-login" onclick="window.location.href='login.html'"><i class="fa-regular fa-user"></i> Đăng nhập</button>
+          <button class="btn-register" onclick="window.location.href='register.html'">Đăng ký</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <div class="container history-page">
+    
+    <!-- Title Card -->
+    <div class="history-header">
+      <div class="history-title">
+        <i class="fa-solid fa-receipt"></i> Quản Lý Lịch Sử Đặt Vé & Dịch Vụ
+      </div>
+      <div class="history-subtitle">
+        Theo dõi trạng thái vé xem phim, bắp nước combo và thông tin check-in tại quầy rạp PTIT Cinema.
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="history-tabs">
+        <button class="h-tab-btn active" id="tab-tickets" onclick="switchTab('tickets')">
+          <i class="fa-solid fa-ticket"></i> Vé xem phim (<span id="count-tickets">0</span>)
+        </button>
+        <button class="h-tab-btn" id="tab-snacks" onclick="switchTab('snacks')">
+          <i class="fa-solid fa-bowl-food"></i> Lịch sử Bắp nước & Combo (<span id="count-snacks">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-card">
+      <form id="filter-form" onsubmit="handleFilterSubmit(event)">
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</label>
+            <input type="text" id="filter-search" class="filter-input" placeholder="Mã vé / Mã đơn / Tên phim..." />
+          </div>
+
+          <div class="filter-group">
+            <label><i class="fa-solid fa-film"></i> Phim</label>
+            <select id="filter-movie" class="filter-input">
+              <option value="">Tất cả phim</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label><i class="fa-solid fa-tags"></i> Trạng thái vé</label>
+            <select id="filter-status" class="filter-input">
+              <option value="">Tất cả trạng thái</option>
+              <option value="Chưa sử dụng">Chưa sử dụng</option>
+              <option value="Đã check-in">Đã check-in</option>
+              <option value="Đã hủy">Đã hủy</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label><i class="fa-regular fa-calendar"></i> Từ ngày</label>
+            <input type="date" id="filter-from-date" class="filter-input" />
+          </div>
+
+          <div class="filter-group">
+            <label><i class="fa-regular fa-calendar"></i> Đến ngày</label>
+            <input type="date" id="filter-to-date" class="filter-input" />
+          </div>
+
+          <button type="submit" class="btn-filter">
+            <i class="fa-solid fa-filter"></i> Lọc
+          </button>
+
+          <button type="button" class="btn-reset" onclick="resetFilters()">
+            <i class="fa-solid fa-rotate-left"></i> Đặt lại
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- CONTENT SECTION -->
+    <div id="content-tickets-section">
+      <!-- Loading State -->
+      <div id="history-loading" style="text-align:center; padding:60px 20px; background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; color:var(--primary); margin-bottom:12px;"></i>
+        <p style="color:var(--text-muted); font-weight:600;">Đang tải lịch sử đặt vé của bạn...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="history-error" style="display:none; text-align:center; padding:40px 20px; background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size:2.5rem; color:#ef4444; margin-bottom:12px;"></i>
+        <h3 style="color:#ef4444; margin-bottom:8px;">Không thể tải dữ liệu lịch sử</h3>
+        <p id="error-message" style="color:var(--text-muted); margin-bottom:16px;">Vui lòng thử lại sau.</p>
+        <button class="btn-filter" style="margin:0 auto;" onclick="loadHistoryData()">Thử lại</button>
+      </div>
+
+      <!-- Empty State -->
+      <div id="history-empty" class="empty-state" style="display:none;">
+        <div class="empty-icon"><i class="fa-solid fa-ticket-simple"></i></div>
+        <h3 style="font-size:1.2rem; font-weight:800; color:var(--text); margin-bottom:8px;">Bạn chưa có đơn đặt vé nào</h3>
+        <p style="color:var(--text-muted); margin-bottom:20px; max-width:400px; margin-left:auto; margin-right:auto;">
+          Hãy chọn cho mình bộ phim yêu thích và trải nghiệm đặt vé nhanh chóng tại PTIT Cinema ngay hôm nay!
+        </p>
+        <a href="phim.html" class="btn-filter" style="display:inline-flex; width:auto; padding:12px 24px;">
+          <i class="fa-solid fa-clapperboard"></i> Khám phá phim đang chiếu
+        </a>
+      </div>
+
+      <!-- Booking Cards List -->
+      <div class="booking-list" id="booking-list">
+        <!-- Dynamic Cards -->
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar" id="pagination-bar" style="display:none;">
+        <!-- Dynamic page buttons -->
+      </div>
+    </div>
+
+    <!-- SNACKS HISTORY SECTION (TAB 2) -->
+    <div id="content-snacks-section" style="display:none;">
+      <div id="snacks-loading" style="text-align:center; padding:40px 20px; background:#fff; border-radius:var(--radius);">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; color:var(--primary); margin-bottom:10px;"></i>
+        <p style="color:var(--text-muted);">Đang tải lịch sử bắp nước...</p>
+      </div>
+
+      <div id="snacks-empty" class="empty-state" style="display:none;">
+        <div class="empty-icon"><i class="fa-solid fa-bowl-food"></i></div>
+        <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:8px;">Chưa có lịch sử mua bắp nước</h3>
+        <p style="color:var(--text-muted);">Bạn chưa mua kèm combo bắp nước nào trong các lần đặt vé.</p>
+      </div>
+
+      <div id="snacks-list-container" style="background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; display:none;">
+        <table class="snack-table">
+          <thead>
+            <tr>
+              <th>Sản phẩm / Combo</th>
+              <th>Số lượng</th>
+              <th>Đơn giá tại thời điểm mua</th>
+              <th>Thành tiền</th>
+              <th>Mã đơn hàng</th>
+              <th>Ngày đặt</th>
+              <th>Trạng thái nhận tại quầy</th>
+            </tr>
+          </thead>
+          <tbody id="snacks-table-body">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL CHI TIẾT VÉ & ĐƠN ĐẶT -->
+  <div class="modal-overlay" id="detail-modal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-content">
+      <button class="modal-close-btn" onclick="closeDetailModal()"><i class="fa-solid fa-xmark"></i></button>
+      
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+        <i class="fa-solid fa-ticket" style="font-size:1.5rem; color:var(--primary);"></i>
+        <div>
+          <h2 style="font-size:1.25rem; font-weight:800; color:var(--primary);" id="modal-title">Chi Tiết Đơn Đặt Vé</h2>
+          <div style="font-size:.8rem; color:var(--text-muted);" id="modal-subtitle">Mã đơn: ...</div>
+        </div>
+      </div>
+
+      <div id="modal-loading" style="text-align:center; padding:30px;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:1.8rem; color:var(--primary);"></i>
+        <p style="color:var(--text-muted); margin-top:8px;">Đang tải chi tiết đơn đặt vé...</p>
+      </div>
+
+      <div id="modal-detail-body" style="display:none;">
+        <!-- Movie Banner inside modal -->
+        <div style="background:#f0f7ff; border-radius:10px; padding:16px; margin-bottom:16px; display:flex; gap:16px; align-items:center;">
+          <img id="m-poster" src="" alt="Poster" style="width:75px; height:105px; border-radius:6px; object-fit:cover;" />
+          <div>
+            <h3 id="m-movie-name" style="font-size:1.1rem; font-weight:800; color:var(--primary); margin-bottom:4px;">...</h3>
+            <div style="font-size:.85rem; color:var(--text); margin-bottom:3px;"><i class="fa-solid fa-door-open" style="color:var(--primary);"></i> <span id="m-room">Phòng 1</span></div>
+            <div style="font-size:.85rem; color:var(--text); margin-bottom:3px;"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> <span id="m-time">...</span></div>
+            <div style="font-size:.85rem; color:var(--text);"><i class="fa-solid fa-building" style="color:var(--primary);"></i> <span id="m-cinema">PTIT Cinema Hà Đông</span></div>
+          </div>
+        </div>
+
+        <!-- Tickets section -->
+        <h4 style="font-size:.95rem; font-weight:800; color:var(--primary); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-couch"></i> Danh Sách Vé Xem Phim & Mã Check-in
+        </h4>
+        <div class="ticket-visual-list" id="modal-ticket-list">
+          <!-- Ticket items -->
+        </div>
+
+        <!-- Snacks section -->
+        <div id="modal-snack-section" style="margin-top:20px;">
+          <h4 style="font-size:.95rem; font-weight:800; color:var(--primary); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+            <i class="fa-solid fa-bowl-food"></i> Bắp Nước & Combo Đã Mua
+          </h4>
+          <table class="snack-table">
+            <thead>
+              <tr>
+                <th>Sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Đơn giá mua</th>
+                <th>Thành tiền</th>
+                <th>Nhận tại quầy</th>
+              </tr>
+            </thead>
+            <tbody id="modal-snack-table-body">
+              <!-- Snacks items -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Payment Breakdown -->
+        <div style="background:#f8fafc; border-radius:10px; padding:16px; margin-top:20px; font-size:.875rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span>Tiền vé:</span> <strong id="m-ticket-subtotal">0 đ</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span>Tiền bắp nước / combo:</span> <strong id="m-snack-subtotal">0 đ</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; color:#16a34a;">
+            <span>Giảm giá:</span> <strong id="m-discount">-0 đ</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span>Phương thức thanh toán:</span> <span id="m-payment-method">VNPAY</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span>Trạng thái thanh toán:</span> <span id="m-payment-status" class="badge badge-paid">Đã thanh toán</span>
+          </div>
+          <hr style="border:none; border-top:1px dashed var(--border); margin:10px 0;" />
+          <div style="display:flex; justify-content:space-between; font-size:1.1rem;">
+            <strong>Tổng thanh toán:</strong> <strong id="m-grand-total" style="color:#e53935;">0 đ</strong>
+          </div>
+        </div>
+
+        <!-- Footer button -->
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+          <button class="btn-reset" onclick="closeDetailModal()"><i class="fa-solid fa-xmark"></i> Đóng</button>
+          <button class="btn-filter" onclick="window.print()"><i class="fa-solid fa-print"></i> In vé</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-bottom">
+      <p>© 2026 PTIT Cinema. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // State
+    let currentTab = 'tickets'; // 'tickets' | 'snacks'
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentFilters = {};
+    let cachedMovies = [];
+
+    // Helper: Trạng thái thanh toán badge
+    function getPaymentBadge(status) {
+      if (status === 'Đã thanh toán') {
+        return `<span class="badge badge-paid"><i class="fa-solid fa-check"></i> Đã thanh toán</span>`;
+      }
+      if (status === 'Đã hủy') {
+        return `<span class="badge badge-cancelled"><i class="fa-solid fa-xmark"></i> Đã hủy</span>`;
+      }
+      return `<span class="badge badge-unpaid"><i class="fa-solid fa-clock"></i> ${status}</span>`;
+    }
+
+    // Helper: Trạng thái vé badge
+    function getTicketStatusBadge(status) {
+      if (status === 'Đã check-in') {
+        return `<span class="badge badge-checkin"><i class="fa-solid fa-circle-check"></i> Đã check-in</span>`;
+      }
+      if (status === 'Đã hủy') {
+        return `<span class="badge badge-cancelled"><i class="fa-solid fa-ban"></i> Đã hủy</span>`;
+      }
+      if (status && status.startsWith('Check-in')) {
+        return `<span class="badge badge-checkin"><i class="fa-solid fa-users-viewfinder"></i> ${status}</span>`;
+      }
+      return `<span class="badge badge-unused"><i class="fa-solid fa-ticket"></i> Chưa sử dụng</span>`;
+    }
+
+    // Helper: Nhận bắp nước badge
+    function getSnackPickupBadge(status) {
+      if (status === 'Đã nhận') {
+        return `<span class="badge badge-paid"><i class="fa-solid fa-circle-check"></i> Đã nhận tại quầy</span>`;
+      }
+      return `<span class="badge badge-unpaid"><i class="fa-solid fa-clock"></i> Chưa nhận</span>`;
+    }
+
+    // ─── Tải danh sách phim cho Bộ lọc ─────────────────────────────────
+    async function loadMoviesFilter() {
+      try {
+        const res = await Api.getPhim();
+        cachedMovies = res.data || [];
+        const select = document.getElementById('filter-movie');
+        cachedMovies.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.MaPhim;
+          opt.textContent = p.TenPhim;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        console.warn('Lỗi tải danh mục phim cho filter:', err);
+      }
+    }
+
+    // ─── Tải lịch sử đặt vé (Tab 1) ────────────────────────────────────
+    async function loadHistoryData(page = 1) {
+      currentPage = page;
+      const listEl = document.getElementById('booking-list');
+      const loadingEl = document.getElementById('history-loading');
+      const emptyEl = document.getElementById('history-empty');
+      const errorEl = document.getElementById('history-error');
+      const pagEl = document.getElementById('pagination-bar');
+
+      loadingEl.style.display = 'block';
+      listEl.innerHTML = '';
+      emptyEl.style.display = 'none';
+      errorEl.style.display = 'none';
+      pagEl.style.display = 'none';
+
+      try {
+        const params = {
+          page: currentPage,
+          limit: 6,
+          ...currentFilters
+        };
+
+        const res = await Api.getLichSu(params);
+        loadingEl.style.display = 'none';
+
+        const items = res.data || [];
+        document.getElementById('count-tickets').textContent = res.pagination?.total || items.length;
+
+        if (items.length === 0) {
+          emptyEl.style.display = 'block';
+          return;
+        }
+
+        totalPages = res.pagination?.totalPages || 1;
+        renderBookingCards(items);
+        renderPagination(res.pagination);
+      } catch (err) {
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'block';
+        document.getElementById('error-message').textContent = err.message || 'Lỗi kết nối máy chủ';
+      }
+    }
+
+    function renderBookingCards(items) {
+      const listEl = document.getElementById('booking-list');
+      listEl.innerHTML = items.map(b => {
+        const poster = getMoviePoster({ MaPhim: b.phim.maPhim, TenPhim: b.phim.tenPhim });
+        const seatsDisplay = b.danhSachGhe || 'Chưa có ghế';
+        const showDate = formatDate(b.suatChieu.thoiGianBatDau);
+        const showTime = formatTime(b.suatChieu.thoiGianBatDau);
+        const orderDate = new Date(b.thoiGianDat).toLocaleString('vi-VN');
+
+        let snackText = 'Không có (0 đ)';
+        let pickupTag = '';
+        if (b.sanPham && b.sanPham.length > 0) {
+          snackText = `${b.sanPham.length} món (${formatVND(b.tienBapNuoc)})`;
+          const allPickedUp = b.sanPham.every(s => s.trangThaiNhan === 'Đã nhận');
+          pickupTag = allPickedUp 
+            ? '<span class="badge badge-paid" style="font-size:.65rem; margin-left:6px;"><i class="fa-solid fa-check"></i> Đã nhận</span>'
+            : '<span class="badge badge-unpaid" style="font-size:.65rem; margin-left:6px;"><i class="fa-solid fa-clock"></i> Chưa nhận</span>';
+        }
+
+        return `
+          <div class="b-card">
+            <div class="b-card-header">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span class="b-code"><i class="fa-solid fa-receipt"></i> Đơn: ${b.maDatVe}</span>
+                <span class="b-date"><i class="fa-regular fa-clock"></i> Đặt lúc: ${orderDate}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:.8rem;color:var(--text-muted);"><i class="fa-solid fa-wallet"></i> ${b.phuongThucThanhToan}</span>
+                ${getPaymentBadge(b.trangThaiThanhToan)}
+                ${getTicketStatusBadge(b.trangThaiVe)}
+              </div>
+            </div>
+
+            <div class="b-card-body">
+              <img src="${poster}" alt="${b.phim.tenPhim}" class="b-poster" onerror="this.src='https://placehold.co/110x155?text=Phim';" />
+              
+              <div class="b-card-center">
+                <div class="b-movie-title">${b.phim.tenPhim}</div>
+                <div class="b-info-row">
+                  <i class="fa-regular fa-calendar-check"></i>
+                  <span>Suất chiếu: <strong>${showTime} • ${showDate}</strong></span>
+                </div>
+                <div class="b-info-row">
+                  <i class="fa-solid fa-door-open"></i>
+                  <span>${b.suatChieu.phong} (${b.suatChieu.loaiPhong || '2D'}) • ${b.rap}</span>
+                </div>
+                <div class="b-info-row">
+                  <i class="fa-solid fa-couch"></i>
+                  <span>Ghế ngồi: <strong style="color:var(--accent);">${seatsDisplay}</strong> <small style="color:var(--text-muted);">(${b.loaiGhe || 'Ghế thường'})</small></span>
+                </div>
+                <div class="b-info-row">
+                  <i class="fa-solid fa-bowl-food"></i>
+                  <span>Bắp nước: <strong>${snackText}</strong> ${pickupTag}</span>
+                </div>
+              </div>
+
+              <div class="b-card-right">
+                <div class="b-total-label">Tổng thanh toán:</div>
+                <div class="b-total-val">${formatVND(b.soTienPhaiThanhToan)}</div>
+                <button class="btn-detail" onclick="openDetailModal('${b.maDatVe}')">
+                  <i class="fa-solid fa-circle-info"></i> Xem chi tiết vé
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ─── Tải lịch sử bắp nước (Tab 2) ──────────────────────────────────
+    async function loadSnacksData() {
+      const loadingEl = document.getElementById('snacks-loading');
+      const emptyEl = document.getElementById('snacks-empty');
+      const containerEl = document.getElementById('snacks-list-container');
+      const tbody = document.getElementById('snacks-table-body');
+
+      loadingEl.style.display = 'block';
+      emptyEl.style.display = 'none';
+      containerEl.style.display = 'none';
+      tbody.innerHTML = '';
+
+      try {
+        const res = await Api.getLichSuBapNuoc();
+        loadingEl.style.display = 'none';
+        const items = res.data || [];
+        document.getElementById('count-snacks').textContent = items.length;
+
+        if (items.length === 0) {
+          emptyEl.style.display = 'block';
+          return;
+        }
+
+        containerEl.style.display = 'block';
+        tbody.innerHTML = items.map(s => {
+          const imgUrl = s.hinhAnh || 'https://images.unsplash.com/photo-1585647347384-2593bc35786b?w=300&auto=format&fit=crop';
+          const orderDate = new Date(s.thoiGianDat).toLocaleDateString('vi-VN');
+          return `
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <img src="${imgUrl}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;" onerror="this.src='https://placehold.co/40x40?text=Food';" />
+                  <div>
+                    <strong>${s.tenSanPham}</strong>
+                    <div style="font-size:.75rem;color:var(--text-muted);">${s.loaiSanPham}</div>
+                  </div>
+                </div>
+              </td>
+              <td><strong>x${s.soLuong}</strong></td>
+              <td>${formatVND(s.donGiaTaiThoiDiemMua)}</td>
+              <td><strong style="color:var(--primary);">${formatVND(s.thanhTien)}</strong></td>
+              <td><a href="#" onclick="openDetailModal('${s.maDatVe}'); return false;" style="color:var(--primary);font-weight:700;">${s.maDatVe}</a></td>
+              <td>${orderDate}</td>
+              <td>${getSnackPickupBadge(s.trangThaiNhan)}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        loadingEl.style.display = 'none';
+        emptyEl.style.display = 'block';
+        emptyEl.innerHTML = `<p style="color:#ef4444;">Lỗi tải dữ liệu bắp nước: ${err.message}</p>`;
+      }
+    }
+
+    // ─── Modal xem chi tiết từng vé & đơn đặt ─────────────────────────
+    async function openDetailModal(maDatVe) {
+      const modal = document.getElementById('detail-modal');
+      const modalLoading = document.getElementById('modal-loading');
+      const modalBody = document.getElementById('modal-detail-body');
+
+      modal.style.display = 'flex';
+      modalLoading.style.display = 'block';
+      modalBody.style.display = 'none';
+      document.getElementById('modal-subtitle').textContent = `Mã đơn đặt vé: ${maDatVe}`;
+
+      try {
+        const res = await Api.getChiTietDatVe(maDatVe);
+        const data = res.data;
+
+        modalLoading.style.display = 'none';
+        modalBody.style.display = 'block';
+
+        // Phim & Suất chiếu
+        document.getElementById('m-poster').src = getMoviePoster({ MaPhim: data.phim.maPhim, TenPhim: data.phim.tenPhim });
+        document.getElementById('m-movie-name').textContent = data.phim.tenPhim;
+        document.getElementById('m-room').textContent = `${data.suatChieu.phong} (${data.suatChieu.loaiPhong || '2D'})`;
+        document.getElementById('m-time').textContent = `${formatTime(data.suatChieu.thoiGianBatDau)} - ${formatDate(data.suatChieu.thoiGianBatDau)}`;
+        document.getElementById('m-cinema').textContent = data.rap || 'PTIT Cinema Hà Đông';
+
+        // Danh sách từng Vé
+        const ticketListEl = document.getElementById('modal-ticket-list');
+        ticketListEl.innerHTML = data.ve.map(v => {
+          let checkinInfo = '';
+          if (v.checkIn) {
+            checkinInfo = `<div style="font-size:.8rem;color:#16a34a;margin-top:4px;"><i class="fa-solid fa-check-double"></i> Check-in lúc ${new Date(v.checkIn.thoiGianCheckIn).toLocaleString('vi-VN')} (NV: ${v.checkIn.nhanVien})</div>`;
+          } else {
+            checkinInfo = `<div style="font-size:.8rem;color:var(--text-muted);margin-top:4px;"><i class="fa-solid fa-clock"></i> Chưa check-in tại quầy</div>`;
+          }
+
+          return `
+            <div class="ticket-visual-card">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div class="ticket-seat-badge">${v.ghe}</div>
+                <div>
+                  <div style="font-weight:800;font-size:1rem;color:var(--text);">Mã vé: <code>${v.maVe}</code></div>
+                  <div style="font-size:.85rem;color:var(--text-muted);">Loại ghế: ${v.loaiGhe} • Giá: ${formatVND(v.giaVe)}</div>
+                  ${checkinInfo}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                ${getTicketStatusBadge(v.trangThaiVe)}
+                <div style="margin-top:8px;font-family:monospace;font-size:.7rem;color:#64748b;letter-spacing:2px;">||| | |||| | ||</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Bắp nước
+        const snackSection = document.getElementById('modal-snack-section');
+        const snackBody = document.getElementById('modal-snack-table-body');
+        if (data.sanPham && data.sanPham.length > 0) {
+          snackSection.style.display = 'block';
+          snackBody.innerHTML = data.sanPham.map(s => `
+            <tr>
+              <td><strong>${s.tenSanPham}</strong></td>
+              <td>x${s.soLuong}</td>
+              <td>${formatVND(s.donGiaTaiThoiDiemMua)}</td>
+              <td><strong>${formatVND(s.thanhTien)}</strong></td>
+              <td>${getSnackPickupBadge(s.trangThaiNhan)}</td>
+            </tr>
+          `).join('');
+        } else {
+          snackSection.style.display = 'none';
+        }
+
+        // Tổng kết tiền
+        document.getElementById('m-ticket-subtotal').textContent = formatVND(data.tienVe);
+        document.getElementById('m-snack-subtotal').textContent = formatVND(data.tienBapNuoc);
+        document.getElementById('m-discount').textContent = `-${formatVND(data.soTienGiamGia)}`;
+        document.getElementById('m-payment-method').textContent = data.phuongThucThanhToan || 'VNPAY';
+        document.getElementById('m-payment-status').innerHTML = getPaymentBadge(data.trangThaiThanhToan);
+        document.getElementById('m-grand-total').textContent = formatVND(data.soTienPhaiThanhToan);
+      } catch (err) {
+        modalLoading.style.display = 'none';
+        alert('Lỗi tải chi tiết vé: ' + err.message);
+        closeDetailModal();
+      }
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal').style.display = 'none';
+    }
+
+    function closeModalOnBackdrop(e) {
+      if (e.target.id === 'detail-modal') closeDetailModal();
+    }
+
+    // ─── Phân trang ────────────────────────────────────────────────────
+    function renderPagination(meta) {
+      const pagEl = document.getElementById('pagination-bar');
+      if (!meta || meta.totalPages <= 1) {
+        pagEl.style.display = 'none';
+        return;
+      }
+      pagEl.style.display = 'flex';
+
+      let html = `
+        <button class="page-btn" ${meta.page <= 1 ? 'disabled' : ''} onclick="loadHistoryData(${meta.page - 1})">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      `;
+
+      for (let p = 1; p <= meta.totalPages; p++) {
+        html += `
+          <button class="page-btn ${p === meta.page ? 'active' : ''}" onclick="loadHistoryData(${p})">${p}</button>
+        `;
+      }
+
+      html += `
+        <button class="page-btn" ${meta.page >= meta.totalPages ? 'disabled' : ''} onclick="loadHistoryData(${meta.page + 1})">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      `;
+
+      pagEl.innerHTML = html;
+    }
+
+    // ─── Xử lý Bộ lọc ──────────────────────────────────────────────────
+    function handleFilterSubmit(e) {
+      e.preventDefault();
+      currentFilters = {
+        search: document.getElementById('filter-search').value.trim(),
+        maPhim: document.getElementById('filter-movie').value,
+        trangThaiVe: document.getElementById('filter-status').value,
+        tuNgay: document.getElementById('filter-from-date').value,
+        denNgay: document.getElementById('filter-to-date').value,
+      };
+      loadHistoryData(1);
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-form').reset();
+      currentFilters = {};
+      loadHistoryData(1);
+    }
+
+    // ─── Chuyển Tab ────────────────────────────────────────────────────
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-tickets').classList.toggle('active', tab === 'tickets');
+      document.getElementById('tab-snacks').classList.toggle('active', tab === 'snacks');
+      document.getElementById('content-tickets-section').style.display = tab === 'tickets' ? 'block' : 'none';
+      document.getElementById('content-snacks-section').style.display = tab === 'snacks' ? 'block' : 'none';
+
+      if (tab === 'snacks') {
+        loadSnacksData();
+      }
+    }
+
+    // ─── Khởi chạy ─────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuthState();
+
+      if (!Api.isLoggedIn()) {
+        alert('Vui lòng đăng nhập để xem lịch sử đặt vé của bạn!');
+        window.location.href = 'login.html?redirect=booking-history.html';
+        return;
+      }
+
+      // Tài khoản nhân viên soát vé không xem lịch sử đặt vé cá nhân (tránh lỗi 403)
+      if (Api.isStaff && Api.isStaff()) {
+        alert('Trang này chỉ dành cho khách hàng xem lịch sử đơn đặt vé cá nhân.\nTài khoản Nhân viên soát vé sẽ được chuyển về Bàn làm việc Soát vé / Check-in!');
+        window.location.href = 'checkin.html';
+        return;
+      }
+
+      loadMoviesFilter();
+      loadHistoryData(1);
+      // Tải trước số lượng snacks
+      Api.getLichSuBapNuoc().then(res => {
+        if (res.data) document.getElementById('count-snacks').textContent = res.data.length;
+      }).catch(() => {});
+    });
+  </script>
+</body>
+</html>

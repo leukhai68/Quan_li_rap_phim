@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Báo cáo - PTIT Cinema</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/baocao.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-top">
+      <div class="container header-inner">
+        <a href="index.html" class="logo">
+          <div class="logo-box">
+            <span class="logo-b">P</span>
+            <div class="logo-text">
+              <span class="logo-main">PTIT</span>
+              <span class="logo-sub">CINEMA</span>
+            </div>
+          </div>
+        </a>
+        <nav class="main-nav">
+          <a href="index.html#schedule-section" class="nav-link"><i class="fa-solid fa-clapperboard"></i> Lịch chiếu theo rạp</a>
+          <a href="phim.html" class="nav-link"><i class="fa-solid fa-film"></i> Phim</a>
+          <a href="rap.html" class="nav-link"><i class="fa-solid fa-building"></i> Rạp</a>
+          <a href="giave.html" class="nav-link"><i class="fa-solid fa-ticket"></i> Giá vé</a>
+          <a href="tintuc.html" class="nav-link"><i class="fa-solid fa-newspaper"></i> Tin tức</a>
+          <a href="baocao.html" class="nav-link active"><i class="fa-solid fa-chart-bar"></i> Báo cáo</a>
+          <a href="booking-history.html" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đặt vé</a>
+        </nav>
+        <div class="header-actions" id="header-actions">
+          <button class="btn-login" onclick="window.location.href='login.html'"><i class="fa-regular fa-user"></i> Đăng nhập</button>
+          <button class="btn-register" onclick="window.location.href='register.html'">Đăng ký</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container" style="padding-top:32px;padding-bottom:60px;">
+    <h1 class="section-title" style="margin-bottom:32px;">
+      <i class="fa-solid fa-chart-line"></i> Báo cáo & Thống kê
+    </h1>
+
+    <!-- Date Range Filter -->
+    <div class="report-filter">
+      <div class="filter-group">
+        <label>Từ ngày</label>
+        <input type="date" id="tu-ngay" value="2026-10-01" />
+      </div>
+      <div class="filter-group">
+        <label>Đến ngày</label>
+        <input type="date" id="den-ngay" value="2026-10-31" />
+      </div>
+      <button class="btn-filter" onclick="loadAllReports()">
+        <i class="fa-solid fa-magnifying-glass-chart"></i> Xem báo cáo
+      </button>
+    </div>
+
+    <!-- REPORT TABS -->
+    <div class="report-tabs">
+      <button class="rtab active" data-rtab="doanh-thu">
+        <i class="fa-solid fa-money-bill-trend-up"></i> Doanh thu phim
+      </button>
+      <button class="rtab" data-rtab="lap-day">
+        <i class="fa-solid fa-chair"></i> Lấp đầy ghế
+      </button>
+      <button class="rtab" data-rtab="top-kh">
+        <i class="fa-solid fa-ranking-star"></i> Top khách hàng
+      </button>
+    </div>
+
+    <!-- Doanh thu phim -->
+    <div id="panel-doanh-thu" class="report-panel">
+      <div id="dt-loading" class="spinner-wrap"><div class="spinner"></div></div>
+      <div id="dt-content" style="display:none">
+        <div class="report-summary" id="dt-summary"></div>
+        <div class="table-wrap">
+          <table class="report-table" id="dt-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Mã phim</th>
+                <th>Tên phim</th>
+                <th>Số vé bán</th>
+                <th>DT vé</th>
+                <th>DT sản phẩm</th>
+                <th>Tổng DT</th>
+              </tr>
+            </thead>
+            <tbody id="dt-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lấp đầy ghế -->
+    <div id="panel-lap-day" class="report-panel" style="display:none">
+      <div id="ld-loading" class="spinner-wrap"><div class="spinner"></div></div>
+      <div id="ld-content" style="display:none">
+        <div class="table-wrap">
+          <table class="report-table" id="ld-table">
+            <thead>
+              <tr>
+                <th>Suất chiếu</th>
+                <th>Phim</th>
+                <th>Phòng</th>
+                <th>Giờ bắt đầu</th>
+                <th>Tổng ghế</th>
+                <th>Đã bán</th>
+                <th>Còn trống</th>
+                <th>Tỉ lệ lấp đầy</th>
+              </tr>
+            </thead>
+            <tbody id="ld-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top khách hàng -->
+    <div id="panel-top-kh" class="report-panel" style="display:none">
+      <div id="kh-loading" class="spinner-wrap"><div class="spinner"></div></div>
+      <div id="kh-content" style="display:none">
+        <div class="table-wrap">
+          <table class="report-table" id="kh-table">
+            <thead>
+              <tr>
+                <th>Hạng</th>
+                <th>Mã KH</th>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Số lần đặt</th>
+                <th>Tổng chi tiêu</th>
+              </tr>
+            </thead>
+            <tbody id="kh-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-bottom"><p>© 2026 PTIT Cinema. All rights reserved.</p></div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/baocao.js"></script>
+</body>
+</html>

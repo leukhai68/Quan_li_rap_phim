@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bảng giá vé - PTIT Cinema</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .pricing-banner {
+      background: linear-gradient(135deg, #003580 0%, #0054a6 60%, #0077cc 100%);
+      color: #fff;
+      padding: 48px 0;
+      text-align: center;
+    }
+    .pricing-banner h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; }
+    .pricing-banner p { font-size: 1rem; color: rgba(255,255,255,.85); max-width: 600px; margin: 0 auto; }
+    
+    .pricing-section { margin: 40px 0; }
+    .pricing-card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 32px;
+    }
+    .pricing-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .price-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .95rem;
+    }
+    .price-table th {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 700;
+    }
+    .price-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .price-table tr:hover { background: rgba(0,84,166,.03); }
+    .highlight-price { font-weight: 800; color: var(--primary); }
+    
+    .age-guide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .age-guide-card {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 16px;
+      border-left: 4px solid var(--primary);
+    }
+    .age-guide-card h4 { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 1rem; }
+    .age-guide-card p { font-size: .85rem; color: var(--text-muted); line-height: 1.4; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-top">
+      <div class="container header-inner">
+        <!-- Logo -->
+        <a href="index.html" class="logo">
+          <div class="logo-box">
+            <span class="logo-b">P</span>
+            <div class="logo-text">
+              <span class="logo-main">PTIT</span>
+              <span class="logo-sub">CINEMA</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Main Nav -->
+        <nav class="main-nav">
+          <a href="index.html#schedule-section" class="nav-link">
+            <i class="fa-solid fa-clapperboard"></i> Lịch chiếu theo rạp
+          </a>
+          <a href="phim.html" class="nav-link">
+            <i class="fa-solid fa-film"></i> Phim
+          </a>
+          <a href="rap.html" class="nav-link">
+            <i class="fa-solid fa-building"></i> Rạp
+          </a>
+          <a href="giave.html" class="nav-link active">
+            <i class="fa-solid fa-ticket"></i> Giá vé
+          </a>
+          <a href="tintuc.html" class="nav-link">
+            <i class="fa-solid fa-newspaper"></i> Tin tức
+          </a>
+          <a href="booking-history.html" class="nav-link">
+            <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đặt vé
+          </a>
+        </nav>
+
+        <!-- Right actions -->
+        <div class="header-actions" id="header-actions">
+          <button class="btn-login" onclick="window.location.href='login.html'">
+            <i class="fa-regular fa-user"></i> Đăng nhập
+          </button>
+          <button class="btn-register" onclick="window.location.href='register.html'">Đăng ký</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BANNER -->
+  <div class="pricing-banner">
+    <div class="container">
+      <h1>Bảng Giá Vé PTIT Cinema</h1>
+      <p>Mức giá hợp lý cho mọi đối tượng - Ưu đãi đặc biệt dành riêng cho Sinh viên & Học sinh toàn quốc.</p>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="container pricing-section">
+    <!-- Bảng giá vé chuẩn -->
+    <div class="pricing-card">
+      <h2 class="pricing-title"><i class="fa-solid fa-money-bill-wave"></i> Bảng giá vé tiêu chuẩn</h2>
+      <div style="overflow-x: auto;">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>Loại ghế / Định dạng</th>
+              <th>Thứ 2 - Thứ 5</th>
+              <th>Thứ 6, Thứ 7, Chủ Nhật</th>
+              <th>Ngày Lễ / Tết</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ghế Thường (2D)</strong></td>
+              <td class="highlight-price">65.000 VNĐ</td>
+              <td class="highlight-price">75.000 VNĐ</td>
+              <td class="highlight-price">85.000 VNĐ</td>
+            </tr>
+            <tr>
+              <td><strong>Ghế VIP (2D)</strong></td>
+              <td class="highlight-price">75.000 VNĐ</td>
+              <td class="highlight-price">85.000 VNĐ</td>
+              <td class="highlight-price">95.000 VNĐ</td>
+            </tr>
+            <tr>
+              <td><strong>Ghế Đôi Sweetbox (2D)</strong></td>
+              <td class="highlight-price">140.000 VNĐ</td>
+              <td class="highlight-price">160.000 VNĐ</td>
+              <td class="highlight-price">180.000 VNĐ</td>
+            </tr>
+            <tr>
+              <td><strong>Phim 3D (Kính 3D)</strong></td>
+              <td class="highlight-price">90.000 VNĐ</td>
+              <td class="highlight-price">110.000 VNĐ</td>
+              <td class="highlight-price">120.000 VNĐ</td>
+            </tr>
+            <tr style="background:#e8f4fd;">
+              <td><strong>Ưu đãi HSSV / PTIT</strong></td>
+              <td class="highlight-price" style="color:#e53935;">50.000 VNĐ</td>
+              <td class="highlight-price" style="color:#e53935;">55.000 VNĐ</td>
+              <td class="highlight-price" style="color:#e53935;">65.000 VNĐ</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quy định độ tuổi -->
+    <div class="pricing-card">
+      <h2 class="pricing-title"><i class="fa-solid fa-triangle-exclamation"></i> Quy định phân loại độ tuổi xem phim</h2>
+      <div class="age-guide-grid">
+        <div class="age-guide-card" style="border-left-color: #43a047;">
+          <h4><span class="age-badge age-badge--P">P</span> Phổ biến</h4>
+          <p>Phim được phép phổ biến rộng rãi cho mọi lứa tuổi khán giả.</p>
+        </div>
+        <div class="age-guide-card" style="border-left-color: #fb8c00;">
+          <h4><span class="age-badge age-badge--T13">T13</span> Trên 13 tuổi</h4>
+          <p>Phim cấm phổ biến tới khán giả dưới 13 tuổi. Cần xuất trình giấy tờ tùy thân khi soát vé.</p>
+        </div>
+        <div class="age-guide-card" style="border-left-color: #e53935;">
+          <h4><span class="age-badge age-badge--T16">T16</span> Trên 16 tuổi</h4>
+          <p>Phim cấm phổ biến tới khán giả dưới 16 tuổi. Cần xuất trình CCCD/thẻ học sinh.</p>
+        </div>
+        <div class="age-guide-card" style="border-left-color: #212121;">
+          <h4><span class="age-badge age-badge--T18">T18</span> Trên 18 tuổi</h4>
+          <p>Phim cấm phổ biến tới khán giả dưới 18 tuổi. Yêu cầu kiểm tra CCCD 100%.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-col">
+        <div class="logo-box" style="margin-bottom:12px;">
+          <span class="logo-b" style="font-size:2rem;">P</span>
+          <div class="logo-text">
+            <span class="logo-main">PTIT</span>
+            <span class="logo-sub">CINEMA</span>
+          </div>
+        </div>
+        <p style="color:#aaa;font-size:13px;">Hệ thống rạp chiếu phim hiện đại hàng đầu Việt Nam.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Về chúng tôi</h4>
+        <ul>
+          <li><a href="tintuc.html">Giới thiệu</a></li>
+          <li><a href="rap.html">Hệ thống rạp</a></li>
+          <li><a href="giave.html">Giá vé</a></li>
+          <li><a href="tintuc.html">Tin tức & Khuyến mãi</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Hỗ trợ</h4>
+        <ul>
+          <li><a href="#">Câu hỏi thường gặp</a></li>
+          <li><a href="#">Điều khoản sử dụng</a></li>
+          <li><a href="#">Chính sách bảo mật</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Liên hệ</h4>
+        <p style="color:#aaa;font-size:13px;"><i class="fa-solid fa-phone"></i> 1900 6868 11</p>
+        <p style="color:#aaa;font-size:13px;"><i class="fa-solid fa-envelope"></i> support@ptitcinema.vn</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 PTIT Cinema. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
