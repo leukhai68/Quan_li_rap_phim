@@ -443,6 +443,18 @@ function checkAuthState() {
         checkinNav.innerHTML = '<i class="fa-solid fa-qrcode"></i> Soát vé / Check-in';
         mainNav.appendChild(checkinNav);
       }
+
+      // Thêm nút "Quản lý NV" cho nhân viên có chức vụ Quản lý / Quản lý ca
+      const user = Api.getUser();
+      const viTri = (user && user.viTriCongViec) ? user.viTriCongViec.toLowerCase() : '';
+      const isAdmin = viTri.includes('quản lý') || viTri.includes('quản trị') || viTri.includes('admin') || viTri.includes('chủ hệ thống');
+      if (isAdmin && !mainNav.querySelector('a[href*="nhanvien.html"]')) {
+        const nvNav = document.createElement('a');
+        nvNav.href = 'nhanvien.html';
+        nvNav.className = 'nav-link' + (window.location.pathname.includes('nhanvien.html') ? ' active' : '');
+        nvNav.innerHTML = '<i class="fa-solid fa-user-tie"></i> Quản lý NV';
+        mainNav.appendChild(nvNav);
+      }
     } else {
       // Khách hàng hoặc chưa đăng nhập: Giữ hiển thị bình thường
       historyLinks.forEach(link => link.style.display = '');
@@ -454,28 +466,44 @@ function checkAuthState() {
   if (isLoggedIn) {
     let actionBtnHtml = '';
     if (userRole === 'nhan_vien') {
-      actionBtnHtml = `
-        <a href="checkin.html" class="btn-nav-action" style="background:#ff6b00; color:#fff; padding:6px 14px; border-radius:20px; font-size:.85rem; font-weight:700; display:inline-flex; align-items:center; gap:6px; transition:.2s; text-decoration:none;">
-          <i class="fa-solid fa-qrcode"></i> Bàn làm việc Soát vé
-        </a>
-      `;
+      const user = Api.getUser();
+      const viTri = (user && user.viTriCongViec) ? user.viTriCongViec.toLowerCase() : '';
+      const isAdmin = viTri.includes('quản lý') || viTri.includes('quản trị') || viTri.includes('admin') || viTri.includes('chủ hệ thống');
+      if (isAdmin) {
+        actionBtnHtml = `
+          <a href="nhanvien.html" class="btn-nav-action btn-manage">
+            <i class="fa-solid fa-user-tie"></i> Quản lý NV
+          </a>
+          <a href="checkin.html" class="btn-nav-action btn-checkin">
+            <i class="fa-solid fa-qrcode"></i> Soát vé
+          </a>
+        `;
+      } else {
+        actionBtnHtml = `
+          <a href="checkin.html" class="btn-nav-action btn-checkin">
+            <i class="fa-solid fa-qrcode"></i> Bàn làm việc Soát vé
+          </a>
+        `;
+      }
     } else {
       actionBtnHtml = `
-        <a href="booking-history.html" class="btn-nav-action" style="background:rgba(255,255,255,.2); color:#fff; border:1px solid rgba(255,255,255,.4); padding:6px 14px; border-radius:20px; font-size:.85rem; font-weight:600; display:inline-flex; align-items:center; gap:6px; transition:.2s; text-decoration:none;">
+        <a href="booking-history.html" class="btn-nav-action btn-history">
           <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đặt vé
         </a>
       `;
     }
 
     headerActions.innerHTML = `
-      <div class="user-greeting" style="display:flex; align-items:center; gap:8px; color:#fff; font-size:.875rem; font-weight:600;">
-        <i class="fa-solid fa-circle-user" style="font-size:1.3rem;"></i>
-        <span>Xin chào, <strong>${userName}</strong>${userRole === 'nhan_vien' ? ' <small style="background:#e53935;padding:2px 6px;border-radius:4px;font-size:.7rem;">NV</small>' : ''}</span>
+      <div class="user-greeting">
+        <i class="fa-solid fa-circle-user user-avatar-icon"></i>
+        <span class="user-name-text">Xin chào, <strong>${userName}</strong>${userRole === 'nhan_vien' ? ' <span class="role-badge role-badge--nv">NV</span>' : ''}</span>
       </div>
-      ${actionBtnHtml}
-      <button class="btn-logout" onclick="handleLogout()" style="background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.4); padding:6px 14px; border-radius:20px; font-size:.85rem; font-weight:600; cursor:pointer; transition:.2s;">
-        <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-      </button>
+      <div class="user-action-buttons">
+        ${actionBtnHtml}
+        <button class="btn-logout" onclick="handleLogout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+        </button>
+      </div>
     `;
   }
 }

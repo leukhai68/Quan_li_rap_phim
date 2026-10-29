@@ -26,6 +26,7 @@ const sanPhamRouter   = require('./routes/sanPham');
 const datVeRouter     = require('./routes/datVe');
 const lichSuRouter    = require('./routes/lichSu');
 const checkInRouter   = require('./routes/checkIn');
+const nhanVienRouter  = require('./routes/nhanVien');
 
 app.use('/api/phim',       phimRouter);
 app.use('/api/suat-chieu', suatChieuRouter);
@@ -35,13 +36,14 @@ app.use('/api/san-pham',   sanPhamRouter);
 app.use('/api/dat-ve',     datVeRouter);
 app.use('/api/lich-su',    lichSuRouter);
 app.use('/api/check-in',   checkInRouter);
+app.use('/api/nhan-vien',  nhanVienRouter);
 
 // ─── Health check ───────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
     message: 'PTIT Cinema API đang hoạt động 🎬',
-    modules: ['Phim', 'Suất chiếu', 'Báo cáo', 'Auth', 'Sản phẩm', 'Đặt vé', 'Lịch sử', 'Check-in'],
+    modules: ['Phim', 'Suất chiếu', 'Báo cáo', 'Auth', 'Sản phẩm', 'Đặt vé', 'Lịch sử', 'Check-in', 'Nhân viên'],
     timestamp: new Date()
   });
 });
@@ -68,5 +70,6 @@ app.listen(PORT, () => {
   console.log(`🎫 Đặt vé:       http://localhost:${PORT}/api/dat-ve`);
   console.log(`📜 Lịch sử vé:   http://localhost:${PORT}/api/lich-su`);
   console.log(`✅ Check-in:     http://localhost:${PORT}/api/check-in/tim-kiem`);
+  console.log(`👔 Nhân viên:    http://localhost:${PORT}/api/nhan-vien`);
   console.log(`📊 Báo cáo:     http://localhost:${PORT}/api/bao-cao/doanh-thu-phim\n`);
 });

@@ -42,17 +42,29 @@ button { cursor: pointer; border: none; outline: none; font-family: inherit; }
 }
 
 /* ── HEADER ───────────────────────────────────────────────────────────── */
-.header { background: var(--primary); box-shadow: 0 2px 12px rgba(0,0,0,.25); position: sticky; top: 0; z-index: 1000; }
+.header {
+  background: var(--primary);
+  box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
 
 .header-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
-  gap: 12px;
+  min-height: 64px;
+  gap: 16px;
+  flex-wrap: nowrap;
 }
 
 /* Logo */
+.logo {
+  text-decoration: none;
+  flex-shrink: 0;
+}
 .logo-box { display: flex; align-items: center; gap: 8px; }
 .logo-b {
   font-size: 2.4rem;
@@ -70,23 +82,155 @@ button { cursor: pointer; border: none; outline: none; font-family: inherit; }
 .logo-sub  { font-size: .65rem; font-weight: 600; color: rgba(255,255,255,.7); letter-spacing: 4px; }
 
 /* Nav */
-.main-nav { display: flex; gap: 4px; }
+.main-nav {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.main-nav::-webkit-scrollbar { display: none; }
 .nav-link {
   color: rgba(255,255,255,.85);
   font-size: .875rem;
   font-weight: 500;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 8px;
   transition: var(--transition);
   white-space: nowrap;
+  flex-shrink: 0;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .nav-link:hover, .nav-link.active {
   background: rgba(255,255,255,.18);
   color: #fff;
 }
 
-/* Header actions */
-.header-actions { display: flex; gap: 8px; align-items: center; }
+/* Header actions & User Info */
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.user-info-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.user-greeting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: .875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.user-avatar-icon {
+  font-size: 1.35rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.user-name-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  color: #fff;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: .7rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.role-badge--nv {
+  background: #e53935;
+  color: #fff;
+}
+
+.user-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.btn-nav-action,
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: .825rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all .2s ease;
+  line-height: 1.4;
+  border: none;
+}
+
+.btn-nav-action.btn-manage {
+  background: #004085;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.btn-nav-action.btn-manage:hover {
+  background: #003366;
+  border-color: #fff;
+}
+
+.btn-nav-action.btn-checkin {
+  background: #ff6b00;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(255, 107, 0, 0.3);
+}
+.btn-nav-action.btn-checkin:hover {
+  background: #e05e00;
+}
+
+.btn-nav-action.btn-history {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.btn-nav-action.btn-history:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-logout {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.btn-logout:hover {
+  background: rgba(239, 68, 68, 0.9);
+  border-color: transparent;
+}
+
 .btn-login {
   background: transparent;
   border: 1.5px solid rgba(255,255,255,.6);
@@ -96,6 +240,8 @@ button { cursor: pointer; border: none; outline: none; font-family: inherit; }
   font-size: .85rem;
   font-weight: 500;
   transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .btn-login:hover { background: rgba(255,255,255,.15); }
 .btn-register {
@@ -106,6 +252,8 @@ button { cursor: pointer; border: none; outline: none; font-family: inherit; }
   font-size: .85rem;
   font-weight: 700;
   transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .btn-register:hover { background: #e8f0fe; }
 
@@ -502,6 +650,10 @@ button { cursor: pointer; border: none; outline: none; font-family: inherit; }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 1200px) {
+  .header-inner { gap: 8px; }
+  .nav-link { padding: 6px 8px; font-size: .8rem; gap: 4px; }
+  .btn-nav-action, .btn-logout { padding: 5px 10px; font-size: .775rem; }
+  .user-greeting { font-size: .8rem; }
   .page-wrapper { gap: 14px; padding: 24px 12px; }
   .side-banner { width: 140px; }
   .phim-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }

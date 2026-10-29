@@ -17,6 +17,22 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- 1b. Thêm tên rạp vào bảng DAT_VE (nếu chưa có)
+SET @col_exists := (
+    SELECT COUNT(*) 
+    FROM information_schema.COLUMNS 
+    WHERE TABLE_SCHEMA = 'QuanLyRapChieuPhim_Final' 
+      AND TABLE_NAME = 'DAT_VE' 
+      AND COLUMN_NAME = 'TenRap'
+);
+SET @sql := IF(@col_exists = 0, 
+    'ALTER TABLE DAT_VE ADD COLUMN TenRap VARCHAR(150) NOT NULL DEFAULT \'PTIT Cinema Hà Đông\';', 
+    'SELECT 1;'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- 2. Thêm mật khẩu cho KHACH_HANG (nếu chưa có)
 SET @col_exists := (
     SELECT COUNT(*) 
@@ -43,6 +59,22 @@ SET @col_exists := (
 );
 SET @sql := IF(@col_exists = 0, 
     'ALTER TABLE NHAN_VIEN ADD COLUMN MatKhau VARCHAR(255) NOT NULL DEFAULT \'123456\';', 
+    'SELECT 1;'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 3b. Thêm trạng thái cho NHAN_VIEN (nếu chưa có)
+SET @col_exists := (
+    SELECT COUNT(*) 
+    FROM information_schema.COLUMNS 
+    WHERE TABLE_SCHEMA = 'QuanLyRapChieuPhim_Final' 
+      AND TABLE_NAME = 'NHAN_VIEN' 
+      AND COLUMN_NAME = 'TrangThai'
+);
+SET @sql := IF(@col_exists = 0, 
+    'ALTER TABLE NHAN_VIEN ADD COLUMN TrangThai ENUM(\'Đang làm\', \'Nghỉ việc\') NOT NULL DEFAULT \'Đang làm\';', 
     'SELECT 1;'
 );
 PREPARE stmt FROM @sql;

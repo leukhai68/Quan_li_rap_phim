@@ -202,6 +202,45 @@ const Api = {
     const params = new URLSearchParams({ tuNgay, denNgay });
     return this.request(`/bao-cao/top-khach-hang?${params}`);
   },
+
+  // ─── QUẢN LÝ NHÂN VIÊN (ADMIN) ────────────────────────────────────────────
+  async getNhanVien(filters = {}) {
+    const params = new URLSearchParams(
+      Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== undefined && v !== ''))
+    );
+    const query = params.toString() ? `?${params}` : '';
+    return this.request(`/nhan-vien${query}`);
+  },
+
+  async getNhanVienById(id) {
+    return this.request(`/nhan-vien/${encodeURIComponent(id)}`);
+  },
+
+  async themNhanVien(data) {
+    return this.request('/nhan-vien', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async suaNhanVien(id, data) {
+    return this.request(`/nhan-vien/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async xoaNhanVien(id) {
+    return this.request(`/nhan-vien/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+  },
+
+  async khoiPhucNhanVien(id) {
+    return this.request(`/nhan-vien/${encodeURIComponent(id)}/khoi-phuc`, {
+      method: 'PATCH'
+    });
+  },
 };
 
 window.Api = Api;

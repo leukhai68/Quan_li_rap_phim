@@ -105,7 +105,8 @@ CREATE TABLE KHACH_HANG (
     SoDienThoai VARCHAR(20) UNIQUE,
     Email VARCHAR(150) UNIQUE,
     NgaySinh DATE,
-    NgayDangKy DATE NOT NULL
+    NgayDangKy DATE NOT NULL,
+    MatKhau VARCHAR(255) NOT NULL DEFAULT '123456'
 ) ENGINE=InnoDB;
 
 -- 9. NHAN_VIEN
@@ -118,6 +119,8 @@ CREATE TABLE NHAN_VIEN (
     NgayVaoLam DATE,
     ViTriCongViec VARCHAR(100),
     LuongCoBan DECIMAL(12,2) NOT NULL,
+    MatKhau VARCHAR(255) NOT NULL DEFAULT '123456',
+    TrangThai ENUM('Đang làm', 'Nghỉ việc') NOT NULL DEFAULT 'Đang làm',
     CHECK (LuongCoBan >= 0)
 ) ENGINE=InnoDB;
 
@@ -145,6 +148,7 @@ CREATE TABLE SAN_PHAM (
     DonGia DECIMAL(12,2) NOT NULL,
     SoLuongTonKho INT NOT NULL DEFAULT 0,
     TrangThaiKinhDoanh ENUM('Đang bán','Ngừng bán') NOT NULL DEFAULT 'Đang bán',
+    HinhAnh VARCHAR(255) NULL,
     CHECK (DonGia >= 0),
     CHECK (SoLuongTonKho >= 0)
 ) ENGINE=InnoDB;
@@ -161,6 +165,8 @@ CREATE TABLE DAT_VE (
     SoTienPhaiThanhToan DECIMAL(12,2) NOT NULL DEFAULT 0,
     TrangThaiThanhToan ENUM('Chưa thanh toán','Đã thanh toán','Đã hủy') NOT NULL,
     MaKhuyenMai VARCHAR(10) NULL,
+    PhuongThucThanhToan VARCHAR(50) NOT NULL DEFAULT 'VNPAY',
+    TenRap VARCHAR(150) NOT NULL DEFAULT 'PTIT Cinema Hà Đông',
     CHECK (TongSoTien >= 0),
     CHECK (SoTienGiamGia >= 0),
     CHECK (SoTienPhaiThanhToan >= 0),
@@ -169,7 +175,8 @@ CREATE TABLE DAT_VE (
     FOREIGN KEY (MaKhachHang) REFERENCES KHACH_HANG(MaKhachHang),
     FOREIGN KEY (MaSuatChieu) REFERENCES SUAT_CHIEU(MaSuatChieu),
     FOREIGN KEY (MaKhuyenMai) REFERENCES KHUYEN_MAI(MaKhuyenMai),
-    INDEX idx_datve_thoigian_trangthai (ThoiGianDat, TrangThaiThanhToan)
+    INDEX idx_datve_thoigian_trangthai (ThoiGianDat, TrangThaiThanhToan),
+    INDEX idx_datve_khachhang (MaKhachHang)
 ) ENGINE=InnoDB;
 
 -- 13. VE
@@ -195,6 +202,7 @@ CREATE TABLE MUA_KEM (
     MaSanPham VARCHAR(10) NOT NULL,
     SoLuong INT NOT NULL,
     DonGiaTaiThoiDiemMua DECIMAL(12,2) NOT NULL,
+    TrangThaiNhan ENUM('Chưa nhận','Đã nhận') NOT NULL DEFAULT 'Chưa nhận',
     PRIMARY KEY (MaDatVe, MaSanPham),
     CHECK (SoLuong > 0),
     CHECK (DonGiaTaiThoiDiemMua >= 0),
@@ -281,7 +289,7 @@ INSERT INTO PHIM_THE_LOAI (MaPhim, MaTheLoai) VALUES
 ('P015','TL04'),
 ('P015','TL06'),
 ('P016','TL07'),
-('P016','TL02');
+('P016','TL02'),
 ('P016','TL08');
 
 INSERT INTO PHONG_CHIEU (MaPhong, TenPhong, LoaiPhong, SucChuaToiDa) VALUES
@@ -550,7 +558,10 @@ INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVao
 ('NV005','Phạm Quốc Bảo','1996-07-23','0955555555','Thanh Xuân, Hà Nội','2023-11-12','Soát vé',7600000),
 ('NV006','Nguyễn Thu Trang','1999-01-09','0966666666','Cầu Giấy, Hà Nội','2025-02-10','Chăm sóc khách hàng',7200000),
 ('NV007','Đỗ Minh Đức','1993-12-02','0977777777','Nam Từ Liêm, Hà Nội','2021-08-15','Kỹ thuật',9500000),
-('NV008','Vũ Ngọc Anh','1994-03-18','0988888888','Hoàng Mai, Hà Nội','2022-06-20','Quản lý ca',11000000);
+('NV008','Vũ Ngọc Anh','1994-03-18','0988888888','Hoàng Mai, Hà Nội','2022-06-20','Quản lý ca',11000000),
+('NV009','Dương Quang Huy','2006-01-01','0123456789','Thái Tử Hà Thành','2026-10-26','Soát vé',100000);
+
+UPDATE NHAN_VIEN SET TrangThai = 'Nghỉ việc' WHERE MaNhanVien = 'NV009';
 
 INSERT INTO KHUYEN_MAI (MaKhuyenMai, TenKhuyenMai, GiaTriGiamGia, GiaTriDonHangToiThieu, NgayBatDau, NgayKetThuc, SoLuotSuDungToiDa) VALUES
 ('KM001','Ưu đãi thành viên',10000,50000,'2026-10-01','2026-12-31',500),
@@ -574,6 +585,14 @@ INSERT INTO SAN_PHAM (MaSanPham, TenSanPham, LoaiSanPham, DonGia, SoLuongTonKho,
 ('SP011','Nachos phô mai','Khác',40000,55,'Đang bán'),
 ('SP012','Cà phê đá','Nước uống',25000,40,'Đang bán'),
 ('SP013','Bắp rang size lớn','Bỏng',45000,60,'Đang bán');
+
+UPDATE SAN_PHAM SET HinhAnh = CASE 
+  WHEN LoaiSanPham = 'Combo' THEN 'https://images.unsplash.com/photo-1585647347384-2593bc35786b?w=300&auto=format&fit=crop'
+  WHEN LoaiSanPham = 'Bỏng' THEN 'https://images.unsplash.com/photo-1578849278619-e73505e9610f?w=300&auto=format&fit=crop'
+  WHEN LoaiSanPham = 'Nước uống' THEN 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&auto=format&fit=crop'
+  ELSE 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?w=300&auto=format&fit=crop'
+END
+WHERE HinhAnh IS NULL;
 
 INSERT INTO DAT_VE (MaDatVe, MaKhachHang, MaSuatChieu, ThoiGianDat, TongSoTien, SoTienGiamGia, SoTienPhaiThanhToan, TrangThaiThanhToan, MaKhuyenMai) VALUES
 ('DV001','KH001','SC001','2026-10-19 10:00:00',120000,10000,110000,'Đã thanh toán','KM001'),

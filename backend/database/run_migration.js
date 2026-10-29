@@ -4,11 +4,17 @@ const path = require('path');
 
 async function run() {
   try {
-    // 1. DAT_VE: PhuongThucThanhToan
+    // 1. DAT_VE: PhuongThucThanhToan & TenRap
     const [colsDV] = await pool.query("SHOW COLUMNS FROM DAT_VE LIKE 'PhuongThucThanhToan'");
     if (colsDV.length === 0) {
       await pool.query("ALTER TABLE DAT_VE ADD COLUMN PhuongThucThanhToan VARCHAR(50) NOT NULL DEFAULT 'VNPAY'");
       console.log('✅ Added PhuongThucThanhToan to DAT_VE');
+    }
+
+    const [colsTR] = await pool.query("SHOW COLUMNS FROM DAT_VE LIKE 'TenRap'");
+    if (colsTR.length === 0) {
+      await pool.query("ALTER TABLE DAT_VE ADD COLUMN TenRap VARCHAR(150) NOT NULL DEFAULT 'PTIT Cinema Hà Đông'");
+      console.log('✅ Added TenRap to DAT_VE');
     }
 
     // 2. KHACH_HANG: MatKhau
@@ -24,6 +30,20 @@ async function run() {
       await pool.query("ALTER TABLE NHAN_VIEN ADD COLUMN MatKhau VARCHAR(255) NOT NULL DEFAULT '123456'");
       console.log('✅ Added MatKhau to NHAN_VIEN');
     }
+
+    // 3b. NHAN_VIEN: TrangThai & NV009
+    const [colsNVTrangThai] = await pool.query("SHOW COLUMNS FROM NHAN_VIEN LIKE 'TrangThai'");
+    if (colsNVTrangThai.length === 0) {
+      await pool.query("ALTER TABLE NHAN_VIEN ADD COLUMN TrangThai ENUM('Đang làm', 'Nghỉ việc') NOT NULL DEFAULT 'Đang làm'");
+      console.log('✅ Added TrangThai to NHAN_VIEN');
+    }
+
+    // Ensure NV009 exists
+    await pool.query(`
+      INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVaoLam, ViTriCongViec, LuongCoBan, MatKhau, TrangThai)
+      VALUES ('NV009', 'Dương Quang Huy', '2006-01-01', '0123456789', 'Thái Tử Hà Thành', '2026-10-26', 'Soát vé', 100000, '123456', 'Nghỉ việc')
+      ON DUPLICATE KEY UPDATE TrangThai = 'Nghỉ việc'
+    `);
 
     // 4. MUA_KEM: TrangThaiNhan
     const [colsMK] = await pool.query("SHOW COLUMNS FROM MUA_KEM LIKE 'TrangThaiNhan'");

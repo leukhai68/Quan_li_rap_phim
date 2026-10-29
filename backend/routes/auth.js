@@ -70,6 +70,15 @@ router.post('/login', async (req, res) => {
 
     if (nvRows.length > 0) {
       const nv = nvRows[0];
+
+      // Kiểm tra trạng thái làm việc của nhân viên
+      if (nv.TrangThai === 'Nghỉ việc') {
+        return res.status(403).json({
+          success: false,
+          message: 'Tài khoản nhân viên này đã bị vô hiệu hóa (ngừng làm việc). Vui lòng liên hệ Quản lý!'
+        });
+      }
+
       const validPass = !nv.MatKhau || nv.MatKhau === inputPassword || (!inputPassword && nv.MatKhau === '123456');
       if (!validPass && nv.MatKhau !== inputPassword) {
         return res.status(400).json({
@@ -84,7 +93,8 @@ router.post('/login', async (req, res) => {
         role: 'nhan_vien',
         hoTen: nv.HoTen,
         soDienThoai: nv.SoDienThoai,
-        viTriCongViec: nv.ViTriCongViec
+        viTriCongViec: nv.ViTriCongViec,
+        trangThai: nv.TrangThai || 'Đang làm'
       };
 
       const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
