@@ -85,8 +85,13 @@ router.get('/', authenticateToken, requireRole('nhan_vien'), requireAdmin, async
     const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
 
     // Validate cột sắp xếp an toàn
-    const allowedSorts = ['NgayVaoLam', 'ViTriCongViec', 'HoTen', 'MaNhanVien', 'LuongCoBan', 'NgaySinh'];
-    const safeSortBy = allowedSorts.includes(sortBy) ? sortBy : 'NgayVaoLam';
+    const allowedSorts = ['NgayVaoLam', 'ViTriCongViec', 'HoTen', 'MaNhanVien', 'LuongCoBan', 'TongLuong', 'NgaySinh'];
+    let safeSortBy = 'nv.NgayVaoLam';
+    if (sortBy === 'TongLuong' || sortBy === 'LuongCoBan') {
+      safeSortBy = 'TongLuong';
+    } else if (allowedSorts.includes(sortBy)) {
+      safeSortBy = `nv.${sortBy}`;
+    }
     const safeSortOrder = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     // Đếm tổng số bản ghi thỏa điều kiện lọc
@@ -101,14 +106,22 @@ router.get('/', authenticateToken, requireRole('nhan_vien'), requireAdmin, async
     const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
     const offset = (pageNum - 1) * limitNum;
 
-    // Lấy danh sách nhân viên
-    const [rows] = await db.execute(
+    // Lấy danh sách nhân viên (kèm số lượt check-in và Tổng Lương thưởng thêm 10.000đ/lượt)
+    const [rows] = await db.query(
       `SELECT nv.MaNhanVien, nv.HoTen, nv.NgaySinh, nv.SoDienThoai, nv.DiaChi,
               nv.NgayVaoLam, nv.ViTriCongViec, nv.LuongCoBan,
+              COALESCE(ci.soLuotCheckIn, 0) AS SoLuotCheckIn,
+              (COALESCE(ci.soLuotCheckIn, 0) * 10000) AS TienThuongCheckIn,
+              COALESCE(nv.TongLuong, (nv.LuongCoBan + COALESCE(ci.soLuotCheckIn, 0) * 10000)) AS TongLuong,
               COALESCE(nv.TrangThai, 'Đang làm') AS TrangThai
        FROM NHAN_VIEN nv
+       LEFT JOIN (
+         SELECT MaNhanVien, COUNT(*) AS soLuotCheckIn
+         FROM CHECK_IN
+         GROUP BY MaNhanVien
+       ) ci ON ci.MaNhanVien = nv.MaNhanVien
        ${whereClause}
-       ORDER BY nv.${safeSortBy} ${safeSortOrder}
+       ORDER BY ${safeSortBy} ${safeSortOrder}
        LIMIT ${limitNum} OFFSET ${offset}`,
       params
     );
@@ -163,7 +176,7 @@ router.get('/:id', authenticateToken, requireRole('nhan_vien'), requireAdmin, as
 
     const [rows] = await db.execute(
       `SELECT nv.MaNhanVien, nv.HoTen, nv.NgaySinh, nv.SoDienThoai, nv.DiaChi,
-              nv.NgayVaoLam, nv.ViTriCongViec, nv.LuongCoBan,
+              nv.NgayVaoLam, nv.ViTriCongViec, nv.LuongCoBan, nv.TongLuong,
               COALESCE(nv.TrangThai, 'Đang làm') AS TrangThai
        FROM NHAN_VIEN nv
        WHERE nv.MaNhanVien = ?`,
@@ -179,6 +192,10 @@ router.get('/:id', authenticateToken, requireRole('nhan_vien'), requireAdmin, as
       `SELECT COUNT(*) AS soLuotCheckIn FROM CHECK_IN WHERE MaNhanVien = ?`,
       [id]
     );
+    const soLuotCheckIn = checkInCount[0].soLuotCheckIn || 0;
+    const tienThuongCheckIn = soLuotCheckIn * 10000;
+    const luongCoBan = parseFloat(rows[0].LuongCoBan) || 0;
+    const tongLuong = rows[0].TongLuong ? parseFloat(rows[0].TongLuong) : (luongCoBan + tienThuongCheckIn);
 
     // Lấy 15 bản ghi lịch sử soát vé gần nhất
     const [recentCheckins] = await db.execute(
@@ -201,7 +218,9 @@ router.get('/:id', authenticateToken, requireRole('nhan_vien'), requireAdmin, as
       success: true,
       data: {
         ...rows[0],
-        soLuotCheckIn: checkInCount[0].soLuotCheckIn,
+        soLuotCheckIn,
+        tienThuongCheckIn,
+        tongLuong,
         lichSuCheckIn: recentCheckins
       }
     });
@@ -292,8 +311,8 @@ router.post('/', authenticateToken, requireRole('nhan_vien'), requireAdmin, asyn
     const ngayVaoLamVal = ngayVaoLam ? ngayVaoLam : new Date().toISOString().split('T')[0];
 
     await db.execute(
-      `INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVaoLam, ViTriCongViec, LuongCoBan, MatKhau, TrangThai)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Đang làm')`,
+      `INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVaoLam, ViTriCongViec, LuongCoBan, TongLuong, MatKhau, TrangThai)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Đang làm')`,
       [
         maNhanVien,
         hoTen.trim(),
@@ -303,6 +322,7 @@ router.post('/', authenticateToken, requireRole('nhan_vien'), requireAdmin, asyn
         ngayVaoLamVal,
         viTriCongViec.trim(),
         Number(luongCoBan),
+        Number(luongCoBan), // Tổng Lương ban đầu bằng Lương cơ bản
         passToSave
       ]
     );
@@ -374,11 +394,19 @@ router.put('/:id', authenticateToken, requireRole('nhan_vien'), requireAdmin, as
       }
     }
 
+    // Tính lại Tổng Lương: Lương cơ bản mới + (Số lượt check-in * 10.000đ)
+    const [ciCount] = await db.execute(
+      `SELECT COUNT(*) AS cnt FROM CHECK_IN WHERE MaNhanVien = ?`,
+      [id]
+    );
+    const cntCheckIn = ciCount[0].cnt || 0;
+    const newTongLuong = Number(luongCoBan) + (cntCheckIn * 10000);
+
     // Nếu có truyền mật khẩu mới thì cập nhật mật khẩu, không thì giữ nguyên
     let updateSql = `
       UPDATE NHAN_VIEN SET 
         HoTen = ?, NgaySinh = ?, SoDienThoai = ?, DiaChi = ?, 
-        NgayVaoLam = ?, ViTriCongViec = ?, LuongCoBan = ?
+        NgayVaoLam = ?, ViTriCongViec = ?, LuongCoBan = ?, TongLuong = ?
     `;
     const updateParams = [
       hoTen.trim(),
@@ -387,7 +415,8 @@ router.put('/:id', authenticateToken, requireRole('nhan_vien'), requireAdmin, as
       diaChi ? diaChi.trim() : null,
       ngayVaoLam || null,
       viTriCongViec.trim(),
-      Number(luongCoBan)
+      Number(luongCoBan),
+      newTongLuong
     ];
 
     if (matKhau && matKhau.trim()) {

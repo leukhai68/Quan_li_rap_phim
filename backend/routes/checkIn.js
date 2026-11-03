@@ -504,6 +504,14 @@ router.post('/xac-nhan', authenticateToken, requireRole('nhan_vien'), async (req
       [maCheckIn, maVe, maNhanVien, thoiGianCheckIn]
     );
 
+    // 5.1. Thưởng thêm 10.000 VNĐ vào Tổng Lương của nhân viên thực hiện check-in
+    await conn.execute(
+      `UPDATE NHAN_VIEN 
+       SET TongLuong = COALESCE(TongLuong, LuongCoBan) + 10000 
+       WHERE MaNhanVien = ?`,
+      [maNhanVien]
+    );
+
     // 6. Cập nhật trạng thái vé thành 'Đã check-in'
     await conn.execute(
       `UPDATE VE SET TrangThaiVe = 'Đã check-in' WHERE MaVe = ?`,
@@ -523,8 +531,8 @@ router.post('/xac-nhan', authenticateToken, requireRole('nhan_vien'), async (req
     await conn.commit();
 
     const responseMsg = (giaoDoAn && soMonDaGiao > 0)
-      ? `🎉 Check-in thành công cho vé ${maVe} (Ghế ${ve.HangGhe}${ve.SoGhe} - ${ve.TenPhim}) & Đã xác nhận giao ${soMonDaGiao} món bắp nước!`
-      : `🎉 Check-in thành công cho vé ${maVe} (Ghế ${ve.HangGhe}${ve.SoGhe} - ${ve.TenPhim})!`;
+      ? `🎉 Check-in thành công vé ${maVe} (Ghế ${ve.HangGhe}${ve.SoGhe} - ${ve.TenPhim}) & Đã giao ${soMonDaGiao} món bắp nước! (+10.000đ thưởng vào Tổng Lương)`
+      : `🎉 Check-in thành công vé ${maVe} (Ghế ${ve.HangGhe}${ve.SoGhe} - ${ve.TenPhim})! (+10.000đ thưởng vào Tổng Lương)`;
 
     res.json({
       success: true,
@@ -539,6 +547,7 @@ router.post('/xac-nhan', authenticateToken, requireRole('nhan_vien'), async (req
         rap: ve.TenRap || 'PTIT Cinema Hà Đông',
         thoiGianCheckIn,
         nhanVien: req.user.hoTen,
+        thuongCheckIn: 10000,
         daGiaoDoAn: !!giaoDoAn,
         soMonDaGiao
       }

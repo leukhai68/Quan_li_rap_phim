@@ -121,6 +121,16 @@ function renderRow(nv) {
 
   const safeName = (nv.HoTen || '').replace(/'/g, "\\'");
 
+  const displayTongLuong = nv.TongLuong !== undefined
+    ? Number(nv.TongLuong)
+    : (Number(nv.LuongCoBan || 0) + (Number(nv.SoLuotCheckIn || 0) * 10000));
+  const checkinCount = Number(nv.SoLuotCheckIn || 0);
+  const bonusHtml = checkinCount > 0
+    ? `<div style="font-size:.74rem; color:#16a34a; font-weight:700; margin-top:2px;">
+         <i class="fa-solid fa-gift"></i> +${fmtVND(checkinCount * 10000)} (${checkinCount} vé)
+       </div>`
+    : '';
+
   let actionsHtml = `
     <div class="action-group">
       <button class="btn-action btn-view" onclick="viewDetail('${nv.MaNhanVien}')" title="Xem chi tiết nhân viên">
@@ -152,7 +162,10 @@ function renderRow(nv) {
       <td style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${nv.DiaChi || ''}">${nv.DiaChi || '—'}</td>
       <td>${fmtDate(nv.NgayVaoLam)}</td>
       <td><span style="background:#e0f2fe; color:#0369a1; padding:3px 10px; border-radius:12px; font-size:.78rem; font-weight:700;">${nv.ViTriCongViec}</span></td>
-      <td style="font-weight:700; color:#b45309;">${fmtVND(nv.LuongCoBan)}</td>
+      <td style="font-weight:700; color:#b45309;">
+        <span style="font-size:.95rem; font-weight:800; color:#b45309;">${fmtVND(displayTongLuong)}</span>
+        ${bonusHtml}
+      </td>
       <td>${statusBadge}</td>
       <td style="text-align:center;">${actionsHtml}</td>
     </tr>
@@ -496,12 +509,23 @@ async function viewDetail(maNV) {
         </div>
         <div class="detail-item">
           <div class="detail-label">Lương cơ bản</div>
-          <div class="detail-value" style="color:#b45309; font-size:1.1rem;">${fmtVND(nv.LuongCoBan)}</div>
+          <div class="detail-value" style="color:var(--text); font-size:1.05rem;">${fmtVND(nv.LuongCoBan)}</div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Tổng lượt soát vé / Check-in</div>
-          <div class="detail-value" style="color:#16a34a; font-size:1.1rem;">
-            <i class="fa-solid fa-ticket"></i> ${nv.soLuotCheckIn || 0} lượt
+          <div class="detail-label">Thưởng Check-in (+10.000đ / lượt)</div>
+          <div class="detail-value" style="color:#16a34a; font-size:1.05rem;">
+            +${fmtVND(nv.tienThuongCheckIn || (nv.soLuotCheckIn || 0) * 10000)} (${nv.soLuotCheckIn || 0} lượt)
+          </div>
+        </div>
+        <div class="detail-item" style="grid-column: span 2; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding:14px 18px; border-radius:10px; border:1.5px solid #f59e0b; margin-top:4px;">
+          <div class="detail-label" style="color:#92400e; font-size:.85rem; font-weight:800; text-transform:uppercase;">
+            <i class="fa-solid fa-coins"></i> Tổng Lương
+          </div>
+          <div class="detail-value" style="color:#b45309; font-size:1.4rem; font-weight:900;">
+            ${fmtVND(nv.tongLuong || nv.TongLuong || (Number(nv.LuongCoBan) + ((nv.soLuotCheckIn || 0) * 10000)))}
+          </div>
+          <div style="color:#78350f; font-size:.8rem; margin-top:2px;">
+            = Lương cơ bản (${fmtVND(nv.LuongCoBan)}) + Thưởng ${nv.soLuotCheckIn || 0} lượt check-in (${fmtVND((nv.soLuotCheckIn || 0) * 10000)})
           </div>
         </div>
       </div>

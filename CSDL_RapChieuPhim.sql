@@ -119,9 +119,11 @@ CREATE TABLE NHAN_VIEN (
     NgayVaoLam DATE,
     ViTriCongViec VARCHAR(100),
     LuongCoBan DECIMAL(12,2) NOT NULL,
+    TongLuong DECIMAL(12,2) NOT NULL DEFAULT 0,
     MatKhau VARCHAR(255) NOT NULL DEFAULT '123456',
     TrangThai ENUM('Đang làm', 'Nghỉ việc') NOT NULL DEFAULT 'Đang làm',
-    CHECK (LuongCoBan >= 0)
+    CHECK (LuongCoBan >= 0),
+    CHECK (TongLuong >= 0)
 ) ENGINE=InnoDB;
 
 -- 10. KHUYEN_MAI
@@ -550,16 +552,16 @@ INSERT INTO KHACH_HANG (MaKhachHang, HoTen, SoDienThoai, Email, NgaySinh, NgayDa
 ('KH032','Lý Tú Linh','0910253408','khach032@example.com','1995-09-26','2026-05-16'),
 ('KH033','Mai Lan Châu','0910261327','khach033@example.com','1998-04-04','2026-07-19');
 
-INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVaoLam, ViTriCongViec, LuongCoBan) VALUES
-('NV001','Phạm Thị Hoa','1995-04-12','0911111111','Hà Nội','2024-01-10','Thu ngân',8000000),
-('NV002','Nguyễn Văn Nam','1998-09-21','0922222222','Hà Nội','2023-06-15','Soát vé',7500000),
-('NV003','Trần Văn Minh','1990-02-03','0933333333','Hà Nội','2022-03-01','Quản lý',12000000),
-('NV004','Lê Thị Mai','1997-05-14','0944444444','Hà Đông, Hà Nội','2024-04-01','Thu ngân',7800000),
-('NV005','Phạm Quốc Bảo','1996-07-23','0955555555','Thanh Xuân, Hà Nội','2023-11-12','Soát vé',7600000),
-('NV006','Nguyễn Thu Trang','1999-01-09','0966666666','Cầu Giấy, Hà Nội','2025-02-10','Chăm sóc khách hàng',7200000),
-('NV007','Đỗ Minh Đức','1993-12-02','0977777777','Nam Từ Liêm, Hà Nội','2021-08-15','Kỹ thuật',9500000),
-('NV008','Vũ Ngọc Anh','1994-03-18','0988888888','Hoàng Mai, Hà Nội','2022-06-20','Quản lý ca',11000000),
-('NV009','Dương Quang Huy','2006-01-01','0123456789','Thái Tử Hà Thành','2026-10-26','Soát vé',100000);
+INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVaoLam, ViTriCongViec, LuongCoBan, TongLuong) VALUES
+('NV001','Phạm Thị Hoa','1995-04-12','0911111111','Hà Nội','2024-01-10','Thu ngân',8000000,8000000),
+('NV002','Nguyễn Văn Nam','1998-09-21','0922222222','Hà Nội','2023-06-15','Soát vé',7500000,7570000),
+('NV003','Trần Văn Minh','1990-02-03','0933333333','Hà Nội','2022-03-01','Quản lý',12000000,12000000),
+('NV004','Lê Thị Mai','1997-05-14','0944444444','Hà Đông, Hà Nội','2024-04-01','Thu ngân',7800000,7800000),
+('NV005','Phạm Quốc Bảo','1996-07-23','0955555555','Thanh Xuân, Hà Nội','2023-11-12','Soát vé',7600000,7620000),
+('NV006','Nguyễn Thu Trang','1999-01-09','0966666666','Cầu Giấy, Hà Nội','2025-02-10','Chăm sóc khách hàng',7200000,7200000),
+('NV007','Đỗ Minh Đức','1993-12-02','0977777777','Nam Từ Liêm, Hà Nội','2021-08-15','Kỹ thuật',9500000,9500000),
+('NV008','Vũ Ngọc Anh','1994-03-18','0988888888','Hoàng Mai, Hà Nội','2022-06-20','Quản lý ca',11000000,11010000),
+('NV009','Dương Quang Huy','2006-01-01','0123456789','Thái Tử Hà Thành','2026-10-26','Soát vé',100000,100000);
 
 UPDATE NHAN_VIEN SET TrangThai = 'Nghỉ việc' WHERE MaNhanVien = 'NV009';
 
