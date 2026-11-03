@@ -567,9 +567,7 @@ INSERT INTO KHUYEN_MAI (MaKhuyenMai, TenKhuyenMai, GiaTriGiamGia, GiaTriDonHangT
 ('KM001','Ưu đãi thành viên',10000,50000,'2026-10-01','2026-12-31',500),
 ('KM002','Ưu đãi sinh viên',5000,40000,'2026-10-01','2026-11-30',200),
 ('KM003','Giảm giá cuối tuần',15000,80000,'2026-10-01','2026-12-31',1000),
-('KM004','Ưu đãi khách hàng mới',20000,100000,'2026-10-01','2026-11-30',300),
-('KM005','Combo tiết kiệm',10000,60000,'2026-09-01','2026-12-31',800),
-('KM006','Ưu đãi ngày lễ',25000,120000,'2026-10-20','2026-11-05',150);
+('KM005','Combo tiết kiệm',10000,60000,'2026-09-01','2026-12-31',800);
 
 INSERT INTO SAN_PHAM (MaSanPham, TenSanPham, LoaiSanPham, DonGia, SoLuongTonKho, TrangThaiKinhDoanh) VALUES
 ('SP001','Bắp rang','Bỏng',30000,100,'Đang bán'),
@@ -797,14 +795,14 @@ ORDER BY TongTienChiTieu DESC LIMIT 10;
 
 -- 5. So ve va doanh thu theo loai ghe, theo phim
 SELECT lg.MaLoaiGhe,lg.TenLoaiGhe,p.MaPhim,p.TenPhim,COUNT(v.MaVe) AS SoVeDaBan,
-       SUM(v.GiaVeTaiThoiDiemMua) AS DoanhThuVe
+       SUM(v.GiaVeTaiThoiDiemMua) AS DoanhThuTheoLoaiGhe
 FROM LOAI_GHE lg JOIN GHE g ON g.MaLoaiGhe=lg.MaLoaiGhe
 JOIN VE v ON v.MaGhe=g.MaGhe JOIN DAT_VE dv ON dv.MaDatVe=v.MaDatVe
 JOIN SUAT_CHIEU sc ON sc.MaSuatChieu=dv.MaSuatChieu JOIN PHIM p ON p.MaPhim=sc.MaPhim
 WHERE dv.TrangThaiThanhToan='Đã thanh toán' AND v.TrangThaiVe<>'Đã hủy'
   AND dv.ThoiGianDat>=@TuNgay AND dv.ThoiGianDat<DATE_ADD(@DenNgay,INTERVAL 1 DAY)
 GROUP BY lg.MaLoaiGhe,lg.TenLoaiGhe,p.MaPhim,p.TenPhim
-ORDER BY DoanhThuVe DESC;
+ORDER BY DoanhThuTheoLoaiGhe DESC;
 
 -- 6. So luong va doanh thu san pham theo thang
 SELECT DATE_FORMAT(dv.ThoiGianDat,'%Y-%m') AS Thang,sp.MaSanPham,sp.TenSanPham,
@@ -823,8 +821,8 @@ SET @ThangLuong='2026-10-01';
 SET @ThuongMoiCheckIn=10000;
 SELECT nv.MaNhanVien,nv.HoTen,nv.ViTriCongViec,nv.LuongCoBan,
        COUNT(ci.MaCheckIn) AS SoLuotCheckIn,
-       COUNT(ci.MaCheckIn)*@ThuongMoiCheckIn AS TienThuong,
-       nv.LuongCoBan+COUNT(ci.MaCheckIn)*@ThuongMoiCheckIn AS TongLuong
+       COUNT(ci.MaCheckIn)*10000 AS TienThuong,
+       nv.LuongCoBan + (COUNT(ci.MaCheckIn) * 10000) AS TongLuong
 FROM NHAN_VIEN nv LEFT JOIN (
   SELECT ci.MaCheckIn,ci.MaNhanVien
   FROM CHECK_IN ci JOIN VE v ON v.MaVe=ci.MaVe

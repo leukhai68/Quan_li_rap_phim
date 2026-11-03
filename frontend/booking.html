@@ -495,6 +495,30 @@
           <div class="summary-line"><span>Ghế đã chọn:</span> <strong id="sum-seats" style="color:var(--accent);">Chưa chọn</strong></div>
           <div class="summary-line"><span>Tiền vé:</span> <strong id="sum-ticket-price">0 đ</strong></div>
           <div class="summary-line"><span>Bắp nước:</span> <strong id="sum-snack-price">0 đ</strong></div>
+
+          <!-- ── CẬP NHẬT GIAO DIỆN THANH TOÁN (Tham chiếu image_d9fce4.jpg) ── -->
+          <!-- Chen giữa dòng "Bắp nước" và dòng "Tổng thanh toán" -->
+          <div class="summary-line summary-discount" id="sum-discount-row">
+            <span>Khuyến mãi áp dụng:</span>
+            <strong id="sum-discount-amount" style="color:#16a34a; font-weight:700;">0 đ</strong>
+          </div>
+          <!-- Block hiển thị chi tiết khi áp mã: Tên Khuyến Mãi (VD: Ưu đãi sinh viên) và số tiền giảm (VD: -5.000đ) -->
+          <div id="applied-promo-box" style="display:none; background:#f0fdf4; border:1px dashed #86efac; border-radius:6px; padding:6px 10px; margin:4px 0 8px 0; font-size:.85rem; color:#16a34a; justify-content:space-between; align-items:center;">
+            <span><i class="fa-solid fa-tag"></i> <strong id="applied-promo-name">Ưu đãi sinh viên</strong></span>
+            <strong id="applied-promo-value">-5.000đ</strong>
+          </div>
+
+          <!-- Bộ chọn mã khuyến mãi khả dụng (KM001, KM002, KM003, KM005) -->
+          <div class="promo-selector-wrap" style="margin:8px 0 12px 0;">
+            <select id="promo-code-select" class="filter-select" style="width:100%; padding:6px 10px; font-size:.82rem; border:1.5px solid #cbd5e1; border-radius:6px; background-color:#f8fafc;" onchange="handlePromoChange()">
+              <option value="">-- Chọn mã khuyến mãi --</option>
+              <option value="KM001">KM001: Ưu đãi thành viên (-10.000đ cho đơn ≥ 50k)</option>
+              <option value="KM002">KM002: Ưu đãi sinh viên (-5.000đ cho đơn ≥ 40k)</option>
+              <option value="KM003">KM003: Giảm giá cuối tuần (-15.000đ cho đơn ≥ 80k)</option>
+              <option value="KM005">KM005: Combo tiết kiệm (-10.000đ cho đơn ≥ 60k)</option>
+            </select>
+          </div>
+
           <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
           <div class="summary-line" style="font-size:1rem;color:var(--text);font-weight:700;">
             <span>Tổng thanh toán:</span>
@@ -860,14 +884,57 @@
         }
       }
 
-      const grandTotal = ticketTotal + snackTotal;
+      const subTotal = ticketTotal + snackTotal;
+      let discountAmount = 0;
+      const appliedPromo = PROMO_DATA[currentPromoCode];
+
+      if (appliedPromo) {
+        if (subTotal >= appliedPromo.minOrder) {
+          discountAmount = appliedPromo.discount;
+        }
+      }
+
+      const grandTotal = Math.max(0, subTotal - discountAmount);
 
       document.getElementById('sum-seats').textContent = selectedSeats.length 
         ? selectedSeats.map(s => s.label).join(', ') 
         : 'Chưa chọn';
       document.getElementById('sum-ticket-price').textContent = formatVND(ticketTotal);
       document.getElementById('sum-snack-price').textContent = formatVND(snackTotal);
+
+      // Cập nhật Khuyến mãi áp dụng
+      const promoBox = document.getElementById('applied-promo-box');
+      const promoAmount = document.getElementById('sum-discount-amount');
+      const promoName = document.getElementById('applied-promo-name');
+      const promoVal = document.getElementById('applied-promo-value');
+
+      if (appliedPromo && discountAmount > 0) {
+        promoBox.style.display = 'flex';
+        promoName.textContent = appliedPromo.name;
+        promoVal.textContent = `-${formatVND(discountAmount)}`;
+        promoAmount.textContent = `-${formatVND(discountAmount)}`;
+      } else {
+        promoBox.style.display = 'none';
+        promoAmount.textContent = '0 đ';
+      }
+
+      // Cập nhật lại số tiền tại "Tổng thanh toán" đã trừ đi khoản này
       document.getElementById('sum-total').textContent = formatVND(grandTotal);
+    }
+
+    // ─── XỬ LÝ KHUYẾN MÃI (Tham chiếu image_d9fce4.jpg) ────────────────────
+    const PROMO_DATA = {
+      'KM001': { code: 'KM001', name: 'Ưu đãi thành viên', discount: 10000, minOrder: 50000 },
+      'KM002': { code: 'KM002', name: 'Ưu đãi sinh viên', discount: 5000, minOrder: 40000 },
+      'KM003': { code: 'KM003', name: 'Giảm giá cuối tuần', discount: 15000, minOrder: 80000 },
+      'KM005': { code: 'KM005', name: 'Combo tiết kiệm', discount: 10000, minOrder: 60000 }
+    };
+    let currentPromoCode = '';
+
+    function handlePromoChange() {
+      const select = document.getElementById('promo-code-select');
+      currentPromoCode = select ? select.value : '';
+      updateSeatSelectionUI();
     }
 
     // ─── 6. XỬ LÝ THANH TOÁN & ĐẶT VÉ ─────────────────────────────────────
@@ -900,12 +967,25 @@
             soLuong: qty
           }));
 
+        const appliedPromo = PROMO_DATA[currentPromoCode];
+        const ticketTotal = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+        let snackTotal = 0;
+        for (const [spId, qty] of Object.entries(selectedSnacks)) {
+          if (qty > 0) {
+            const p = availableProducts.find(item => item.MaSanPham === spId);
+            if (p) snackTotal += parseFloat(p.DonGia) * qty;
+          }
+        }
+        const subTotal = ticketTotal + snackTotal;
+        const isPromoValid = appliedPromo && (subTotal >= appliedPromo.minOrder);
+
         const payload = {
           maSuatChieu: targetShowtimeId,
           danhSachMaGhe: selectedSeats.map(s => s.id),
           danhSachSanPham,
           phuongThucThanhToan: paymentMethod,
-          tenRap: selectedCinema
+          tenRap: selectedCinema,
+          maKhuyenMai: isPromoValid ? appliedPromo.code : null
         };
 
         const res = await Api.datVe(payload);

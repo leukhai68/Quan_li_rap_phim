@@ -273,7 +273,7 @@ function renderPhimCard(phim) {
 
   return `
     <div class="phim-card">
-      <div class="phim-card__poster">
+      <div class="phim-card__poster poster-container">
         <img src="${posterSrc}" 
              alt="${phim.TenPhim}" 
              onerror="if (!this.dataset.triedFallback) { this.dataset.triedFallback = '1'; this.src = 'http://localhost:5000/' + '${posterSrc}'; } else { this.onerror = null; this.src = 'https://placehold.co/300x450/0054a6/ffffff?text=${encodeURIComponent(phim.TenPhim)}'; }" 
@@ -281,14 +281,12 @@ function renderPhimCard(phim) {
              loading="lazy" />
         ${getAgeBadge(phim.GioiHanDoTuoi)}
         
-        <!-- Nút mũi tên Play xem trailer -->
-        <div class="phim-card__overlay" 
-             onclick="openTrailerModal('${phim.MaPhim}', '${safeTitle}', ${phim.ThoiLuong || 0}, ${phim.GioiHanDoTuoi || 0})" 
-             title="Bấm để xem trailer ${safeTitle}">
-          <button type="button" class="play-btn-circle" aria-label="Xem trailer ${safeTitle}">
-            <i class="fa-solid fa-play"></i>
-          </button>
-        </div>
+        <!-- Nút Play xem trailer -->
+        <button type="button" class="play-btn play-btn-circle" 
+                onclick="openTrailerModal('${phim.MaPhim}', '${safeTitle}', ${phim.ThoiLuong || 0}, ${phim.GioiHanDoTuoi || 0})" 
+                aria-label="Xem trailer ${safeTitle}">
+          <i class="fa-solid fa-play"></i>
+        </button>
       </div>
       <div class="phim-card__info">
         <div class="phim-card__title" title="${phim.TenPhim}">${phim.TenPhim}</div>

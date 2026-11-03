@@ -324,6 +324,7 @@ router.get('/:maDatVe', authenticateToken, async (req, res) => {
     const [dvRows] = await db.execute(
       `SELECT 
         dv.*,
+        km.TenKhuyenMai,
         sc.MaSuatChieu,
         sc.ThoiGianBatDau,
         sc.ThoiGianKetThuc,
@@ -336,6 +337,7 @@ router.get('/:maDatVe', authenticateToken, async (req, res) => {
         pc.TenPhong,
         pc.LoaiPhong
        FROM DAT_VE dv
+       LEFT JOIN KHUYEN_MAI km ON km.MaKhuyenMai = dv.MaKhuyenMai
        JOIN SUAT_CHIEU sc ON sc.MaSuatChieu = dv.MaSuatChieu
        JOIN PHIM p ON p.MaPhim = sc.MaPhim
        JOIN PHONG_CHIEU pc ON pc.MaPhong = sc.MaPhong
@@ -456,6 +458,8 @@ router.get('/:maDatVe', authenticateToken, async (req, res) => {
         tongSoTien: parseFloat(dv.TongSoTien),
         soTienGiamGia: parseFloat(dv.SoTienGiamGia),
         soTienPhaiThanhToan: parseFloat(dv.SoTienPhaiThanhToan),
+        maKhuyenMai: dv.MaKhuyenMai,
+        tenKhuyenMai: dv.TenKhuyenMai,
         phuongThucThanhToan: dv.PhuongThucThanhToan || 'VNPAY',
         trangThaiThanhToan: dv.TrangThaiThanhToan,
         ve: formattedTickets,
