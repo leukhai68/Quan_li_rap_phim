@@ -366,7 +366,7 @@
       <div class="step-item active"><div class="step-number">1</div> Chọn rạp, phim & suất chiếu</div>
       <div class="step-item active"><div class="step-number">2</div> Chọn ghế</div>
       <div class="step-item active"><div class="step-number">3</div> Bắp nước</div>
-      <div class="step-item active"><div class="step-number">4</div> Thanh toán</div>
+      <div class="step-item"><div class="step-number">4</div> Xác nhận thanh toán</div>
     </div>
 
     <div class="booking-grid">
@@ -501,7 +501,7 @@
           </div>
           <div class="total-price" id="sum-total">0 đ</div>
           <button class="btn-checkout" id="btn-submit-booking" onclick="handleCheckout()">
-            <i class="fa-solid fa-credit-card"></i> XÁC NHẬN THANH TOÁN
+            <i class="fa-solid fa-ticket"></i> ĐẶT VÉ
           </button>
         </div>
       </aside>
@@ -890,7 +890,7 @@
 
       const checkoutBtn = document.getElementById('btn-submit-booking');
       checkoutBtn.disabled = true;
-      checkoutBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XỬ LÝ THANH TOÁN...';
+      checkoutBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO ĐƠN ĐẶT VÉ...';
 
       try {
         const danhSachSanPham = Object.entries(selectedSnacks)
@@ -911,47 +911,14 @@
         const res = await Api.datVe(payload);
         const booking = res.data;
 
-        // Hiển thị modal thành công
-        const modalInfo = document.getElementById('modal-booking-info');
-        const ticketsList = booking.ve.map(v => `${v.hangGhe}${v.soGhe} (${v.tenLoaiGhe})`).join(', ');
-        const snacksSummary = booking.sanPham.length > 0 
-          ? booking.sanPham.map(s => `${s.tenSanPham} x${s.soLuong}`).join(', ') 
-          : 'Không có';
-
-        modalInfo.innerHTML = `
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-            <span>Mã đặt vé:</span> <strong style="color:var(--primary);">${booking.maDatVe}</strong>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-            <span>Rạp chiếu:</span> <strong style="color:var(--primary);">${booking.rap || selectedCinema}</strong>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-            <span>Phim:</span> <strong>${booking.phim}</strong>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-            <span>Phòng chiếu:</span> <strong>${booking.phong}</strong>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-            <span>Ghế đã đặt:</span> <strong style="color:var(--accent);">${ticketsList}</strong>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-            <span>Bắp nước:</span> <span>${snacksSummary}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-            <span>Phương thức:</span> <span>${booking.phuongThucThanhToan}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;border-top:1px dashed #cbd5e1;padding-top:8px;font-size:1rem;">
-            <span>Tổng thanh toán:</span> <strong style="color:#e53935;">${formatVND(booking.soTienPhaiThanhToan)}</strong>
-          </div>
-        `;
-
-        document.getElementById('success-modal').style.display = 'flex';
+        // Chuyển sang trang Xác nhận thanh toán (payment.html), KHÔNG hiện popup ở bước này
+        window.location.href = `payment.html?maDatVe=${encodeURIComponent(booking.maDatVe)}`;
       } catch (err) {
         alert(`❌ Đặt vé không thành công:\n${err.message}`);
         // Tải lại sơ đồ ghế để cập nhật ghế vừa bị người khác đặt mất
         await reloadSeatMap();
         checkoutBtn.disabled = false;
-        checkoutBtn.innerHTML = '<i class="fa-solid fa-credit-card"></i> XÁC NHẬN THANH TOÁN';
+        checkoutBtn.innerHTML = '<i class="fa-solid fa-ticket"></i> ĐẶT VÉ';
       }
     }
 

@@ -10,6 +10,20 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
  */
 router.get('/', authenticateToken, requireRole('khach_hang'), async (req, res) => {
   try {
+    // Tự động dọn dẹp đơn quá hạn 15 phút
+    try {
+      await db.query(`
+        UPDATE DAT_VE SET TrangThaiThanhToan = 'Đã hủy'
+        WHERE TrangThaiThanhToan = 'Chưa thanh toán'
+          AND ThoiGianDat < NOW() - INTERVAL 15 MINUTE
+      `);
+      await db.query(`
+        UPDATE VE v JOIN DAT_VE dv ON dv.MaDatVe = v.MaDatVe
+        SET v.TrangThaiVe = 'Đã hủy'
+        WHERE dv.TrangThaiThanhToan = 'Đã hủy' AND v.TrangThaiVe = 'Chưa sử dụng'
+      `);
+    } catch (e) {}
+
     const maKhachHang = req.user.userId;
     const {
       page = 1,
@@ -42,11 +56,15 @@ router.get('/', authenticateToken, requireRole('khach_hang'), async (req, res) =
       params.push(maPhim);
     }
     if (trangThaiVe) {
-      whereClauses.push(`EXISTS (
-        SELECT 1 FROM VE v_filter 
-        WHERE v_filter.MaDatVe = dv.MaDatVe AND v_filter.TrangThaiVe = ?
-      )`);
-      params.push(trangThaiVe);
+      if (trangThaiVe === 'Chưa thanh toán') {
+        whereClauses.push(`dv.TrangThaiThanhToan = 'Chưa thanh toán'`);
+      } else {
+        whereClauses.push(`EXISTS (
+          SELECT 1 FROM VE v_filter 
+          WHERE v_filter.MaDatVe = dv.MaDatVe AND v_filter.TrangThaiVe = ?
+        )`);
+        params.push(trangThaiVe);
+      }
     }
     if (search && search.trim()) {
       const q = `%${search.trim()}%`;
@@ -90,6 +108,7 @@ router.get('/', authenticateToken, requireRole('khach_hang'), async (req, res) =
         p.TenPhim,
         p.ThoiLuong,
         p.GioiHanDoTuoi,
+        p.Poster,
         pc.TenPhong,
         pc.LoaiPhong
       FROM DAT_VE dv
@@ -228,7 +247,8 @@ router.get('/', authenticateToken, requireRole('khach_hang'), async (req, res) =
           maPhim: b.MaPhim,
           tenPhim: b.TenPhim,
           thoiLuong: b.ThoiLuong,
-          gioiHanDoTuoi: b.GioiHanDoTuoi
+          gioiHanDoTuoi: b.GioiHanDoTuoi,
+          poster: b.Poster
         },
         suatChieu: {
           maSuatChieu: b.MaSuatChieu,
@@ -344,6 +364,7 @@ router.get('/:maDatVe', authenticateToken, requireRole('khach_hang'), async (req
         p.TenPhim,
         p.ThoiLuong,
         p.GioiHanDoTuoi,
+        p.Poster,
         pc.TenPhong,
         pc.LoaiPhong
        FROM DAT_VE dv

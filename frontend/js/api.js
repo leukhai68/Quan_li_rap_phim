@@ -130,11 +130,28 @@ const Api = {
     return this.request(`/san-pham${query}`);
   },
 
-  // ─── ĐẶT VÉ ────────────────────────────────────────────────────────────────
+  // ─── ĐẶT VÉ & THANH TOÁN ────────────────────────────────────────────────
   async datVe(bookingData) {
     return this.request('/dat-ve', {
       method: 'POST',
       body: JSON.stringify(bookingData)
+    });
+  },
+
+  async getBooking(maDatVe) {
+    return this.request(`/dat-ve/${encodeURIComponent(maDatVe)}`);
+  },
+
+  async payBooking(maDatVe, phuongThucThanhToan = 'VNPAY') {
+    return this.request(`/dat-ve/${encodeURIComponent(maDatVe)}/pay`, {
+      method: 'PUT',
+      body: JSON.stringify({ phuongThucThanhToan })
+    });
+  },
+
+  async cancelBooking(maDatVe) {
+    return this.request(`/dat-ve/${encodeURIComponent(maDatVe)}/cancel`, {
+      method: 'PUT'
     });
   },
 

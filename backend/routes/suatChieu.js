@@ -3,12 +3,34 @@ const router = express.Router();
 const db = require('../config/db');
 
 /**
+ * Tự động hủy các đơn 'Chưa thanh toán' đã quá hạn giữ chỗ (15 phút)
+ */
+async function autoCancelExpired() {
+  try {
+    await db.query(`
+      UPDATE DAT_VE SET TrangThaiThanhToan = 'Đã hủy'
+      WHERE TrangThaiThanhToan = 'Chưa thanh toán'
+        AND ThoiGianDat < NOW() - INTERVAL 15 MINUTE
+    `);
+    await db.query(`
+      UPDATE VE v
+      JOIN DAT_VE dv ON dv.MaDatVe = v.MaDatVe
+      SET v.TrangThaiVe = 'Đã hủy'
+      WHERE dv.TrangThaiThanhToan = 'Đã hủy' AND v.TrangThaiVe = 'Chưa sử dụng'
+    `);
+  } catch (err) {
+    console.error('Lỗi khi tự động hủy vé quá hạn trong suatChieu:', err);
+  }
+}
+
+/**
  * GET /api/suat-chieu
  * Lấy danh sách suất chiếu
  * Query: ?maPhim=P001 | ?ngay=2026-10-22 | ?maPhong=PC01
  */
 router.get('/', async (req, res) => {
   try {
+    await autoCancelExpired();
     const { maPhim, ngay, maPhong, trangthai } = req.query;
 
     let sql = `
@@ -36,7 +58,7 @@ router.get('/', async (req, res) => {
         SELECT dv.MaSuatChieu, COUNT(v.MaVe) AS SoVeDaBan
         FROM DAT_VE dv
         JOIN VE v ON v.MaDatVe = dv.MaDatVe
-        WHERE dv.TrangThaiThanhToan = 'Đã thanh toán'
+        WHERE dv.TrangThaiThanhToan <> 'Đã hủy'
           AND v.TrangThaiVe <> 'Đã hủy'
         GROUP BY dv.MaSuatChieu
       ) sold ON sold.MaSuatChieu = sc.MaSuatChieu
@@ -74,10 +96,11 @@ router.get('/', async (req, res) => {
 
 /**
  * GET /api/suat-chieu/:id
- * Chi tiết suất chiếu + danh sách ghế
+ * Chi tiết suất chiếu + danh sách ghế (ghế đang giữ chỗ hoặc đã mua đều là 'Đã bán')
  */
 router.get('/:id', async (req, res) => {
   try {
+    await autoCancelExpired();
     const { id } = req.params;
 
     const [[sc]] = await db.execute(`

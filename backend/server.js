@@ -34,6 +34,7 @@ app.use('/api/bao-cao',    baoCaoRouter);
 app.use('/api/auth',       authRouter);
 app.use('/api/san-pham',   sanPhamRouter);
 app.use('/api/dat-ve',     datVeRouter);
+app.use('/api/bookings',   datVeRouter);
 app.use('/api/lich-su',    lichSuRouter);
 app.use('/api/check-in',   checkInRouter);
 app.use('/api/nhan-vien',  nhanVienRouter);
