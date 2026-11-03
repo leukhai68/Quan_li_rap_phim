@@ -193,7 +193,8 @@ Trang giao diện: **`frontend/nhanvien.html`**
 | Method | Endpoint | Mô tả |
 | :--- | :--- | :--- |
 | `GET` | `/api/san-pham` | Danh sách bắp nước, combo |
-| `POST` | `/api/dat-ve` | Tạo đơn đặt vé, giữ ghế và chọn sản phẩm |
+| `GET` | `/api/dat-ve/danh-sach-khuyen-mai` | [MỚI] Danh sách 4 khuyến mãi khả dụng (KM001, KM002, KM003, KM005) kèm số lượt đã dùng, còn lại và thang % |
+| `POST` | `/api/dat-ve` | Tạo đơn đặt vé, giữ ghế, chọn sản phẩm và áp dụng khuyến mãi |
 | `GET` | `/api/lich-su` | Tra cứu lịch sử đặt vé |
 
 ### 5. Check-in & Báo cáo
@@ -205,6 +206,44 @@ Trang giao diện: **`frontend/nhanvien.html`**
 | `GET` | `/api/bao-cao/doanh-thu-phim` | Quản lý | Báo cáo doanh thu theo phim |
 | `GET` | `/api/bao-cao/lap-day-ghe` | Quản lý | Thống kê tỷ lệ lấp đầy ghế các phòng chiếu |
 | `GET` | `/api/bao-cao/top-khach-hang` | Quản lý | Top 10 khách hàng chi tiêu nhiều nhất |
+
+---
+
+## 🎟️ Cập nhật Bảng Giá Vé & Khuyến Mãi (Mới Nhất)
+
+1. **Cơ sở dữ liệu Khuyến mãi & Loại bỏ hoàn toàn KM004, KM006**:
+   - Bảng `KHUYEN_MAI` chỉ lưu đúng 4 bản ghi khả dụng: `KM001` (Ưu đãi thành viên), `KM002` (Ưu đãi sinh viên), `KM003` (Giảm giá cuối tuần), `KM005` (Combo tiết kiệm).
+   - Đã loại bỏ hoàn toàn các mã `KM004` (Khách hàng mới) và `KM006` (Ngày lễ) khỏi CSDL gốc, API backend và danh sách lựa chọn frontend.
+   - **Câu lệnh SQL cập nhật an toàn (chống lỗi khóa ngoại)**:
+     ```sql
+     -- 1. Gỡ liên kết trong bảng DAT_VE nếu có dữ liệu cũ tham chiếu tới KM004 hoặc KM006
+     UPDATE DAT_VE SET MaKhuyenMai = NULL WHERE MaKhuyenMai IN ('KM004', 'KM006');
+
+     -- 2. Xóa bỏ hoàn toàn 2 mã khuyến mãi KM004 và KM006
+     DELETE FROM KHUYEN_MAI WHERE MaKhuyenMai IN ('KM004', 'KM006');
+     ```
+
+2. **Bảng Giá Vé (`frontend/giave.html`)**:
+   - Bảng giá vé được chuẩn hóa thành **3 cột**: *Loại ghế*, *Giá vé ngày thường (Thứ 2 - Thứ 6)* và *Giá vé cuối tuần (Thứ 7 - CN)*.
+   - **Quy tắc hiển thị giá**: 
+     - Ghế Thường: **75.000 VNĐ** (Ngày thường) | **60.000 VNĐ** (Cuối tuần)
+     - Ghế VIP: **100.000 VNĐ** (Ngày thường) | **85.000 VNĐ** (Cuối tuần)
+     - Ghế Đôi: **130.000 VNĐ** (Ngày thường) | **115.000 VNĐ** (Cuối tuần)
+   - Đã xóa hoàn toàn chú thích/badge `-15.000đ (KM003)` bên cạnh mức giá cuối tuần để bảng hiển thị trực quan, sạch sẽ và chuyên nghiệp.
+   - Toàn bộ khối thẻ khuyến mãi đã được gỡ khỏi trang Bảng giá vé để hiển thị độc quyền tại trang Đặt vé.
+
+3. **Kiểm tra Điều kiện Khuyến mãi theo Thời điểm & Đối tượng (`frontend/booking.html`)**:
+   - Hệ thống trang bị hàm kiểm tra tính hợp lệ `checkPromoEligibility(promoCode, subTotal, snackTotal)` và tự động lấy thông tin ngày chiếu qua `getShowtimeInfo()`:
+     - **Mã `KM003` (Giảm giá cuối tuần)**: **Chỉ áp dụng cho các suất chiếu diễn ra vào Thứ Bảy & Chủ Nhật** và đơn hàng tối thiểu 80.000đ. Nếu kiểm thử với suất chiếu ngày thường (ví dụ: Thứ Ba ngày 20/10/2026), hệ thống sẽ từ chối áp dụng và hiển thị thông báo cảnh báo rõ ràng:
+       > ⚠️ *Mã KM003 chỉ áp dụng cho suất chiếu Thứ Bảy & Chủ Nhật. Suất chiếu đang chọn diễn ra vào Thứ Ba (09:00 20/10/2026).*
+     - **Mã `KM005` (Combo tiết kiệm)**: Bắt buộc đơn hàng phải mua kèm ít nhất 1 phần bắp nước hoặc combo (`snackTotal > 0`) và đơn từ 60.000đ. Nếu chưa chọn bắp nước, hệ thống báo:
+       > ⚠️ *Mã combo tiết kiệm yêu cầu mua kèm ít nhất 1 phần Bắp nước hoặc Combo ở mục '3. Chọn bắp nước & Combo'.*
+     - **Mã `KM001` (Ưu đãi thành viên)**: Kiểm tra tài khoản thành viên đã đăng nhập và đơn từ 50.000đ.
+     - **Mã `KM002` (Ưu đãi sinh viên)**: Áp dụng đơn từ 40.000đ (Lưu ý xuất trình thẻ HSSV/CCCD khi nhận vé tại quầy).
+   - **Giao diện phản hồi thông minh**:
+     - Khi **Đủ điều kiện**: Khối `#applied-promo-box` hiển thị màu xanh lá kèm số tiền giảm (`-15.000đ`), dòng *Khuyến mãi áp dụng* hiển thị tiền giảm, và số tiền tại *Tổng thanh toán* được trừ đi tương ứng.
+     - Khi **Chưa đủ điều kiện**: Khối `#applied-promo-box` đổi sang màu đỏ cảnh báo kèm lý do chi tiết vì sao không áp dụng được, dòng *Khuyến mãi áp dụng* hiển thị `0 đ (Chưa đủ ĐK)`, và *Tổng thanh toán* giữ nguyên giá gốc.
+     - Khối **Tình trạng ưu đãi** (Thang % tiến độ, đã dùng, còn lại) vẫn hiển thị đồng bộ 100% theo mã được chọn từ dropdown, kèm huy hiệu trạng thái *Đủ điều kiện* hoặc *Chưa đủ điều kiện*.
 
 ---
 

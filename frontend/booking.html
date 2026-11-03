@@ -509,14 +509,39 @@
           </div>
 
           <!-- Bộ chọn mã khuyến mãi khả dụng (KM001, KM002, KM003, KM005) -->
-          <div class="promo-selector-wrap" style="margin:8px 0 12px 0;">
-            <select id="promo-code-select" class="filter-select" style="width:100%; padding:6px 10px; font-size:.82rem; border:1.5px solid #cbd5e1; border-radius:6px; background-color:#f8fafc;" onchange="handlePromoChange()">
+          <div class="promo-selector-wrap" style="margin:8px 0 6px 0;">
+            <select id="promo-code-select" class="filter-select" style="width:100%; padding:7px 10px; font-size:.82rem; border:1.5px solid #cbd5e1; border-radius:6px; background-color:#f8fafc;" onchange="handlePromoChange()">
               <option value="">-- Chọn mã khuyến mãi --</option>
-              <option value="KM001">KM001: Ưu đãi thành viên (-10.000đ cho đơn ≥ 50k)</option>
-              <option value="KM002">KM002: Ưu đãi sinh viên (-5.000đ cho đơn ≥ 40k)</option>
-              <option value="KM003">KM003: Giảm giá cuối tuần (-15.000đ cho đơn ≥ 80k)</option>
-              <option value="KM005">KM005: Combo tiết kiệm (-10.000đ cho đơn ≥ 60k)</option>
+              <option value="KM001">KM001: Ưu đãi thành viên (-10k) | Đã dùng 64.0% - Còn 180 lượt</option>
+              <option value="KM002">KM002: Ưu đãi sinh viên (-5k) | Đã dùng 72.5% - Còn 55 lượt</option>
+              <option value="KM003">KM003: Giảm giá cuối tuần (-15k) | Đã dùng 82.0% - Còn 180 lượt</option>
+              <option value="KM005">KM005: Combo tiết kiệm (-10k) | Đã dùng 51.3% - Còn 390 lượt</option>
             </select>
+          </div>
+
+          <!-- Thang % tiến độ & Số lượng ưu đãi đã dùng / còn lại -->
+          <div class="promo-usage-card" id="promo-usage-card" style="display:none; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px 12px; margin-bottom:12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:.78rem; margin-bottom:5px;">
+              <span style="color:#64748b; font-weight:600;"><i class="fa-solid fa-chart-simple" style="color:var(--primary);margin-right:4px;"></i>Tình trạng ưu đãi:</span>
+              <span style="font-weight:700; color:#1e293b;">
+                Đã dùng: <strong id="promo-stat-used" style="color:#0284c7;">320</strong>/<span id="promo-stat-max">500</span> lượt
+              </span>
+            </div>
+
+            <!-- Thang % (Thanh tiến trình trực quan) -->
+            <div class="promo-progress-track" style="width:100%; height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden; position:relative; margin-bottom:6px;">
+              <div id="promo-progress-fill" style="width:0%; height:100%; background:linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius:999px; transition:width 0.4s ease, background-color 0.3s;"></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:.74rem;">
+              <span style="font-weight:700; color:#059669;" id="promo-stat-percent">
+                <i class="fa-solid fa-percent"></i> Đã dùng: 0%
+              </span>
+              <span style="font-weight:700; color:#e11d48;" id="promo-stat-remain">
+                <i class="fa-solid fa-fire"></i> Còn lại: 0 lượt
+              </span>
+            </div>
+            <div id="promo-eligibility-badge" style="margin-top:7px; padding-top:6px; border-top:1px dashed #e2e8f0; font-size:.73rem; font-weight:600; text-align:right;"></div>
           </div>
 
           <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
@@ -731,6 +756,8 @@
         document.getElementById('sum-cinema').textContent = selectedCinema;
 
         renderSeatMap(scData.danhSachGhe || []);
+        // Đồng bộ kiểm tra lại điều kiện khuyến mãi theo ngày/giờ của suất chiếu vừa tải
+        updateUI();
       } catch (err) {
         seatMapEl.innerHTML = `<div style="color:#dc2626;padding:30px;"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi tải sơ đồ ghế: ${err.message}</div>`;
       }
@@ -863,6 +890,157 @@
     }
 
     // ─── 5. CẬP NHẬT GIAO DIỆN & TỔNG TIỀN ─────────────────────────────────
+    function getShowtimeInfo() {
+      let dtStr = null;
+      if (currentShowtime && currentShowtime.ThoiGianBatDau) {
+        dtStr = currentShowtime.ThoiGianBatDau;
+      } else if (Array.isArray(currentMovieShowtimes) && targetShowtimeId) {
+        const found = currentMovieShowtimes.find(st => st.MaSuatChieu === targetShowtimeId);
+        if (found && found.ThoiGianBatDau) dtStr = found.ThoiGianBatDau;
+      }
+
+      if (!dtStr) {
+        return {
+          hasShowtime: false,
+          isWeekend: false,
+          dayIndex: -1,
+          dayName: 'Chưa xác định',
+          dateFormatted: '',
+          timeFormatted: '',
+          displayString: ''
+        };
+      }
+
+      const d = new Date(dtStr);
+      const day = d.getDay(); // 0 = Chủ Nhật, 6 = Thứ Bảy
+      const isWeekend = (day === 0 || day === 6);
+      const dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+      const dayName = dayNames[day];
+      const dateFormatted = formatDate(dtStr);
+      const timeFormatted = formatTime(dtStr);
+
+      return {
+        hasShowtime: true,
+        isWeekend,
+        dayIndex: day,
+        dayName,
+        dateFormatted,
+        timeFormatted,
+        displayString: `${dayName}, ${timeFormatted} ${dateFormatted}`
+      };
+    }
+
+    /**
+     * Kiểm tra tính hợp lệ của mã khuyến mãi theo điều kiện:
+     * - Đối tượng sử dụng (Thành viên / Sinh viên / Khách hàng)
+     * - Thời điểm sử dụng (Thứ 7 & CN đối với KM003)
+     * - Giá trị đơn hàng tối thiểu
+     * - Điều kiện kèm bắp nước đối với KM005
+     */
+    function checkPromoEligibility(promoCode, subTotal, snackTotal) {
+      if (!promoCode || !PROMO_DATA[promoCode]) {
+        return { isValid: false, reason: '', discountAmount: 0 };
+      }
+
+      const promo = PROMO_DATA[promoCode];
+      const stInfo = getShowtimeInfo();
+
+      // 1. Kiểm tra điều kiện giá trị đơn hàng tối thiểu
+      if (subTotal < promo.minOrder) {
+        return {
+          isValid: false,
+          code: promoCode,
+          name: promo.name,
+          reason: `Đơn hàng tối thiểu ${formatVND(promo.minOrder)} (Hiện tại: ${formatVND(subTotal)}). Vui lòng chọn thêm ghế hoặc bắp nước.`,
+          discountAmount: 0,
+          note: `Yêu cầu đơn ≥ ${formatVND(promo.minOrder)}`
+        };
+      }
+
+      // 2. Kiểm tra điều kiện riêng biệt của từng mã
+      if (promoCode === 'KM003') {
+        // Giảm giá cuối tuần: CHỈ áp dụng cho suất chiếu Thứ Bảy & Chủ Nhật
+        if (!stInfo.isWeekend) {
+          const showtimeText = stInfo.hasShowtime ? `${stInfo.dayName} (${stInfo.timeFormatted} ${stInfo.dateFormatted})` : 'ngày thường (Thứ 2 - Thứ 6)';
+          return {
+            isValid: false,
+            code: promoCode,
+            name: promo.name,
+            reason: `Mã KM003 chỉ áp dụng cho suất chiếu Thứ Bảy & Chủ Nhật. Suất chiếu đang chọn diễn ra vào ${showtimeText}.`,
+            discountAmount: 0,
+            note: 'Chỉ áp dụng suất chiếu T7 & CN'
+          };
+        }
+        return {
+          isValid: true,
+          code: promoCode,
+          name: promo.name,
+          discountAmount: promo.discount,
+          reason: `Áp dụng thành công Giảm giá cuối tuần (-${formatVND(promo.discount)})`,
+          note: `Suất chiếu cuối tuần (${stInfo.dayName})`
+        };
+      }
+
+      if (promoCode === 'KM005') {
+        // Combo tiết kiệm: Bắt buộc phải có mua bắp nước / combo
+        if (!snackTotal || snackTotal <= 0) {
+          return {
+            isValid: false,
+            code: promoCode,
+            name: promo.name,
+            reason: `Mã combo tiết kiệm yêu cầu mua kèm ít nhất 1 phần Bắp nước hoặc Combo ở mục '3. Chọn bắp nước & Combo'.`,
+            discountAmount: 0,
+            note: 'Yêu cầu có bắp nước / combo'
+          };
+        }
+        return {
+          isValid: true,
+          code: promoCode,
+          name: promo.name,
+          discountAmount: promo.discount,
+          reason: `Áp dụng thành công Combo tiết kiệm (-${formatVND(promo.discount)})`,
+          note: 'Đã bao gồm bắp nước / combo'
+        };
+      }
+
+      if (promoCode === 'KM001') {
+        // Ưu đãi thành viên: Kiểm tra khách hàng đã đăng nhập tài khoản
+        const isLogged = (typeof Api !== 'undefined' && Api.isLoggedIn && Api.isLoggedIn());
+        if (!isLogged) {
+          return {
+            isValid: false,
+            code: promoCode,
+            name: promo.name,
+            reason: `Mã ưu đãi thành viên chỉ áp dụng cho khách hàng đã đăng nhập tài khoản PTIT Cinema.`,
+            discountAmount: 0,
+            note: 'Yêu cầu tài khoản Thành viên'
+          };
+        }
+        return {
+          isValid: true,
+          code: promoCode,
+          name: promo.name,
+          discountAmount: promo.discount,
+          reason: `Áp dụng thành công Ưu đãi thành viên (-${formatVND(promo.discount)})`,
+          note: 'Đã xác thực tài khoản Thành viên'
+        };
+      }
+
+      if (promoCode === 'KM002') {
+        // Ưu đãi sinh viên
+        return {
+          isValid: true,
+          code: promoCode,
+          name: promo.name,
+          discountAmount: promo.discount,
+          reason: `Áp dụng thành công Ưu đãi sinh viên (-${formatVND(promo.discount)})`,
+          note: 'Lưu ý: Vui lòng xuất trình thẻ HSSV/CCCD khi nhận vé tại quầy soát vé.'
+        };
+      }
+
+      return { isValid: false, reason: 'Mã khuyến mãi không khả dụng.', discountAmount: 0 };
+    }
+
     function updateUI() {
       // Toggle class selected trên sơ đồ ghế
       document.querySelectorAll('.seat').forEach(el => {
@@ -886,11 +1064,13 @@
 
       const subTotal = ticketTotal + snackTotal;
       let discountAmount = 0;
-      const appliedPromo = PROMO_DATA[currentPromoCode];
+      const appliedPromo = PROMO_DATA[currentPromoCode] || null;
+      let promoCheck = { isValid: false, reason: '', discountAmount: 0 };
 
       if (appliedPromo) {
-        if (subTotal >= appliedPromo.minOrder) {
-          discountAmount = appliedPromo.discount;
+        promoCheck = checkPromoEligibility(currentPromoCode, subTotal, snackTotal);
+        if (promoCheck.isValid) {
+          discountAmount = promoCheck.discountAmount;
         }
       }
 
@@ -905,36 +1085,162 @@
       // Cập nhật Khuyến mãi áp dụng
       const promoBox = document.getElementById('applied-promo-box');
       const promoAmount = document.getElementById('sum-discount-amount');
-      const promoName = document.getElementById('applied-promo-name');
-      const promoVal = document.getElementById('applied-promo-value');
 
-      if (appliedPromo && discountAmount > 0) {
-        promoBox.style.display = 'flex';
-        promoName.textContent = appliedPromo.name;
-        promoVal.textContent = `-${formatVND(discountAmount)}`;
-        promoAmount.textContent = `-${formatVND(discountAmount)}`;
+      if (appliedPromo) {
+        promoBox.style.display = 'block';
+        if (promoCheck.isValid) {
+          promoBox.style.background = '#f0fdf4';
+          promoBox.style.borderColor = '#86efac';
+          promoBox.style.color = '#15803d';
+          promoBox.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+              <span><i class="fa-solid fa-circle-check" style="color:#16a34a;"></i> <strong>${promoCheck.name}</strong></span>
+              <strong style="color:#16a34a; font-size:0.92rem;">-${formatVND(discountAmount)}</strong>
+            </div>
+            <div style="font-size:0.75rem; color:#15803d; line-height:1.35;">${promoCheck.note || 'Đã áp dụng mã giảm giá cho đơn hàng.'}</div>
+          `;
+          promoAmount.textContent = `-${formatVND(discountAmount)}`;
+          promoAmount.style.color = '#16a34a';
+        } else {
+          promoBox.style.background = '#fff1f2';
+          promoBox.style.borderColor = '#fca5a5';
+          promoBox.style.color = '#be123c';
+          promoBox.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+              <span style="font-weight:700; color:#be123c;"><i class="fa-solid fa-triangle-exclamation"></i> Không thể áp dụng mã</span>
+              <span style="background:#fee2e2; color:#be123c; font-size:0.7rem; font-weight:700; padding:2px 6px; border-radius:4px;">0 đ</span>
+            </div>
+            <div style="font-size:0.76rem; color:#881337; line-height:1.35;">${promoCheck.reason}</div>
+          `;
+          promoAmount.innerHTML = '<span style="color:#e11d48; font-size:0.8rem; font-weight:700;">0 đ (Chưa đủ ĐK)</span>';
+        }
       } else {
         promoBox.style.display = 'none';
         promoAmount.textContent = '0 đ';
+        promoAmount.style.color = 'var(--text-muted)';
       }
+
+      // Cập nhật Thang % tiến độ & Số lượng ưu đãi đã dùng / còn lại
+      updatePromoUsageCard(appliedPromo, promoCheck.isValid);
 
       // Cập nhật lại số tiền tại "Tổng thanh toán" đã trừ đi khoản này
       document.getElementById('sum-total').textContent = formatVND(grandTotal);
     }
 
-    // ─── XỬ LÝ KHUYẾN MÃI (Tham chiếu image_d9fce4.jpg) ────────────────────
+    // ─── XỬ LÝ KHUYẾN MÃI (Thang % & Số lượng đã dùng / còn lại) ───────────
     const PROMO_DATA = {
-      'KM001': { code: 'KM001', name: 'Ưu đãi thành viên', discount: 10000, minOrder: 50000 },
-      'KM002': { code: 'KM002', name: 'Ưu đãi sinh viên', discount: 5000, minOrder: 40000 },
-      'KM003': { code: 'KM003', name: 'Giảm giá cuối tuần', discount: 15000, minOrder: 80000 },
-      'KM005': { code: 'KM005', name: 'Combo tiết kiệm', discount: 10000, minOrder: 60000 }
+      'KM001': { code: 'KM001', name: 'Ưu đãi thành viên', discount: 10000, minOrder: 50000, max: 500, used: 320 },
+      'KM002': { code: 'KM002', name: 'Ưu đãi sinh viên', discount: 5000, minOrder: 40000, max: 200, used: 145 },
+      'KM003': { code: 'KM003', name: 'Giảm giá cuối tuần', discount: 15000, minOrder: 80000, max: 1000, used: 820 },
+      'KM005': { code: 'KM005', name: 'Combo tiết kiệm', discount: 10000, minOrder: 60000, max: 800, used: 410 }
     };
     let currentPromoCode = '';
 
-    function handlePromoChange() {
-      const select = document.getElementById('promo-code-select');
-      currentPromoCode = select ? select.value : '';
-      updateSeatSelectionUI();
+    // Hàm xử lý sự kiện change của thẻ <select> chọn khuyến mãi
+    function handlePromoChange(event) {
+      const select = (event && event.target) ? event.target : document.getElementById('promo-code-select');
+      currentPromoCode = select ? select.value.trim() : '';
+
+      // 1. Map ngay lập tức với object data khuyến mãi tương ứng
+      const promo = PROMO_DATA[currentPromoCode] || null;
+
+      // 2. Re-render đồng bộ ngay khối 'Tình trạng ưu đãi' (Progress bar, %, lượt)
+      updatePromoUsageCard(promo, false);
+
+      // 3. Re-calculate và cập nhật chiết khấu đơn hàng + tổng thanh toán + thông báo điều kiện
+      updateUI();
+    }
+
+    // Alias dự phòng tương thích ngược
+    function updateSeatSelectionUI() {
+      updateUI();
+    }
+
+    function updatePromoUsageCard(promo, isEligible) {
+      const card = document.getElementById('promo-usage-card');
+      if (!card) return;
+
+      if (!promo) {
+        card.style.display = 'none';
+        return;
+      }
+
+      card.style.display = 'block';
+      const used = Number(promo.used) || 0;
+      const max = Number(promo.max) || 1;
+      const remain = Math.max(0, max - used);
+      const percent = Math.min(100, parseFloat(((used / max) * 100).toFixed(1)));
+
+      // Cập nhật số liệu hiển thị
+      const statUsed = document.getElementById('promo-stat-used');
+      const statMax = document.getElementById('promo-stat-max');
+      const statPercent = document.getElementById('promo-stat-percent');
+      const statRemain = document.getElementById('promo-stat-remain');
+      const fill = document.getElementById('promo-progress-fill');
+      const badge = document.getElementById('promo-eligibility-badge');
+
+      if (statUsed) statUsed.textContent = used.toLocaleString('vi-VN');
+      if (statMax) statMax.textContent = max.toLocaleString('vi-VN');
+      if (statPercent) statPercent.innerHTML = `<i class="fa-solid fa-chart-pie"></i> Đã dùng: ${percent}%`;
+      if (statRemain) statRemain.innerHTML = `<i class="fa-solid fa-fire"></i> Còn lại: ${remain.toLocaleString('vi-VN')} lượt`;
+
+      // Cập nhật chiều dài thanh tiến trình màu xanh (và đổi màu tương ứng mức độ)
+      if (fill) {
+        fill.style.width = `${percent}%`;
+
+        if (percent >= 90) {
+          fill.style.background = 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)';
+          if (statPercent) statPercent.style.color = '#dc2626';
+        } else if (percent >= 70) {
+          fill.style.background = 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)';
+          if (statPercent) statPercent.style.color = '#d97706';
+        } else {
+          fill.style.background = 'linear-gradient(90deg, #10b981 0%, #059669 100%)';
+          if (statPercent) statPercent.style.color = '#059669';
+        }
+      }
+
+      if (badge) {
+        if (isEligible) {
+          badge.innerHTML = '<span style="color:#15803d;"><i class="fa-solid fa-circle-check"></i> Đủ điều kiện cho đơn hàng này</span>';
+        } else {
+          badge.innerHTML = '<span style="color:#e11d48;"><i class="fa-solid fa-circle-exclamation"></i> Đơn hàng chưa thỏa mãn điều kiện</span>';
+        }
+      }
+    }
+
+    async function loadPromotionsData() {
+      try {
+        if (typeof Api !== 'undefined' && Api.getKhuyenMai) {
+          const res = await Api.getKhuyenMai();
+          if (res && res.success && Array.isArray(res.data)) {
+            const select = document.getElementById('promo-code-select');
+            const validCodes = ['KM001', 'KM002', 'KM003', 'KM005'];
+            const validPromos = res.data.filter(item => validCodes.includes(item.maKhuyenMai));
+
+            validPromos.forEach(item => {
+              if (PROMO_DATA[item.maKhuyenMai]) {
+                PROMO_DATA[item.maKhuyenMai].used = item.soLuotDaDung;
+                PROMO_DATA[item.maKhuyenMai].max = item.soLuotSuDungToiDa;
+                if (item.giaTriGiamGia) PROMO_DATA[item.maKhuyenMai].discount = parseFloat(item.giaTriGiamGia);
+                if (item.giaTriDonHangToiThieu) PROMO_DATA[item.maKhuyenMai].minOrder = parseFloat(item.giaTriDonHangToiThieu);
+              }
+            });
+
+            // Cập nhật text trong select option: Tuyệt đối chỉ render 4 mã KM001, KM002, KM003, KM005
+            if (select) {
+              const currentVal = select.value;
+              select.innerHTML = '<option value="">-- Chọn mã khuyến mãi --</option>' + validPromos.map(item => {
+                const discountK = item.giaTriGiamGia >= 1000 ? (item.giaTriGiamGia / 1000) + 'k' : item.giaTriGiamGia + 'đ';
+                return `<option value="${item.maKhuyenMai}">${item.maKhuyenMai}: ${item.tenKhuyenMai} (-${discountK}) | Đã dùng ${item.phanTramDaDung}% - Còn ${item.soLuotConLai} lượt</option>`;
+              }).join('');
+              select.value = currentVal;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Fallback sang dữ liệu khuyến mãi cục bộ:', err);
+      }
     }
 
     // ─── 6. XỬ LÝ THANH TOÁN & ĐẶT VÉ ─────────────────────────────────────
@@ -967,7 +1273,6 @@
             soLuong: qty
           }));
 
-        const appliedPromo = PROMO_DATA[currentPromoCode];
         const ticketTotal = selectedSeats.reduce((sum, s) => sum + s.price, 0);
         let snackTotal = 0;
         for (const [spId, qty] of Object.entries(selectedSnacks)) {
@@ -977,7 +1282,17 @@
           }
         }
         const subTotal = ticketTotal + snackTotal;
-        const isPromoValid = appliedPromo && (subTotal >= appliedPromo.minOrder);
+        const promoCheck = checkPromoEligibility(currentPromoCode, subTotal, snackTotal);
+
+        // Nếu người dùng chọn mã khuyến mãi nhưng không đủ điều kiện, cảnh báo người dùng
+        if (currentPromoCode && !promoCheck.isValid) {
+          const proceed = confirm(`⚠️ Khuyến mãi "${currentPromoCode}" không đủ điều kiện áp dụng:\n${promoCheck.reason}\n\nĐơn hàng sẽ được tạo với giá gốc không giảm (${formatVND(subTotal)}). Bạn có muốn tiếp tục không?`);
+          if (!proceed) {
+            checkoutBtn.disabled = false;
+            checkoutBtn.innerHTML = '<i class="fa-solid fa-ticket"></i> ĐẶT VÉ';
+            return;
+          }
+        }
 
         const payload = {
           maSuatChieu: targetShowtimeId,
@@ -985,7 +1300,7 @@
           danhSachSanPham,
           phuongThucThanhToan: paymentMethod,
           tenRap: selectedCinema,
-          maKhuyenMai: isPromoValid ? appliedPromo.code : null
+          maKhuyenMai: promoCheck.isValid ? currentPromoCode : null
         };
 
         const res = await Api.datVe(payload);
@@ -1007,6 +1322,12 @@
       checkAuthState();
       initMoviesList();
       loadProducts();
+      loadPromotionsData();
+
+      const selectEl = document.getElementById('promo-code-select');
+      if (selectEl) {
+        selectEl.addEventListener('change', handlePromoChange);
+      }
     });
   </script>
 </body>

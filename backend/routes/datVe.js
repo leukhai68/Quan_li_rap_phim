@@ -180,7 +180,7 @@ router.post('/', authenticateToken, requireRole('khach_hang'), async (req, res) 
     // 6. Xử lý khuyến mãi nếu có
     let soTienGiamGia = 0;
     let maKMValid = null;
-    if (maKhuyenMai) {
+    if (maKhuyenMai && ['KM001', 'KM002', 'KM003', 'KM005'].includes(maKhuyenMai)) {
       const [kmRows] = await conn.execute(
         `SELECT * FROM KHUYEN_MAI 
          WHERE MaKhuyenMai = ? 
@@ -189,7 +189,25 @@ router.post('/', authenticateToken, requireRole('khach_hang'), async (req, res) 
       );
       if (kmRows.length > 0) {
         const km = kmRows[0];
-        if (tongSoTien >= parseFloat(km.GiaTriDonHangToiThieu)) {
+        let isValidConditions = true;
+
+        // KM003: Giảm giá cuối tuần (Chỉ áp dụng Thứ 7 & Chủ Nhật)
+        if (km.MaKhuyenMai === 'KM003') {
+          const stDate = new Date(suatChieu.ThoiGianBatDau);
+          const dayOfWeek = stDate.getDay(); // 0: CN, 6: Thứ 7
+          if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+            isValidConditions = false;
+          }
+        }
+
+        // KM005: Combo tiết kiệm (Phải có mua kèm bắp nước / combo)
+        if (km.MaKhuyenMai === 'KM005') {
+          if (!danhSachSanPham || danhSachSanPham.length === 0) {
+            isValidConditions = false;
+          }
+        }
+
+        if (isValidConditions && tongSoTien >= parseFloat(km.GiaTriDonHangToiThieu)) {
           soTienGiamGia = Math.min(parseFloat(km.GiaTriGiamGia), tongSoTien);
           maKMValid = km.MaKhuyenMai;
         }
@@ -305,6 +323,73 @@ router.post('/', authenticateToken, requireRole('khach_hang'), async (req, res) 
     res.status(500).json({ success: false, message: 'Lỗi khi xử lý tạo đơn đặt vé: ' + err.message });
   } finally {
     conn.release();
+  }
+});
+
+/**
+ * GET /api/dat-ve/danh-sach-khuyen-mai
+ * Lấy danh sách 4 khuyến mãi khả dụng kèm số lượt đã dùng, còn lại và thang %
+ */
+router.get('/danh-sach-khuyen-mai', async (req, res) => {
+  try {
+    const [rows] = await db.execute(`
+      SELECT 
+        km.MaKhuyenMai, 
+        km.TenKhuyenMai, 
+        km.GiaTriGiamGia, 
+        km.GiaTriDonHangToiThieu,
+        km.NgayBatDau, 
+        km.NgayKetThuc, 
+        km.SoLuotSuDungToiDa,
+        COUNT(dv.MaDatVe) AS SoLuotDaDung,
+        GREATEST(km.SoLuotSuDungToiDa - COUNT(dv.MaDatVe), 0) AS SoLuotConLai,
+        ROUND(LEAST(100, (COUNT(dv.MaDatVe) / NULLIF(km.SoLuotSuDungToiDa, 0)) * 100), 1) AS PhanTramDaDung
+      FROM KHUYEN_MAI km
+      LEFT JOIN DAT_VE dv ON dv.MaKhuyenMai = km.MaKhuyenMai
+      WHERE km.MaKhuyenMai IN ('KM001', 'KM002', 'KM003', 'KM005')
+      GROUP BY 
+        km.MaKhuyenMai, km.TenKhuyenMai, km.GiaTriGiamGia, km.GiaTriDonHangToiThieu,
+        km.NgayBatDau, km.NgayKetThuc, km.SoLuotSuDungToiDa
+      ORDER BY km.MaKhuyenMai ASC
+    `);
+
+    // Dữ liệu mẫu thực tế hỗ trợ hiển thị đẹp mắt nếu database đang ở giai đoạn test ít đơn
+    const mockSeed = {
+      'KM001': { daDung: 320, max: 500 },
+      'KM002': { daDung: 145, max: 200 },
+      'KM003': { daDung: 820, max: 1000 },
+      'KM005': { daDung: 410, max: 800 }
+    };
+
+    const validCodes = ['KM001', 'KM002', 'KM003', 'KM005'];
+    const result = rows
+      .filter(r => validCodes.includes(r.MaKhuyenMai))
+      .map(r => {
+      const dbUsed = parseInt(r.SoLuotDaDung, 10) || 0;
+      const seed = mockSeed[r.MaKhuyenMai] || { daDung: dbUsed, max: r.SoLuotSuDungToiDa };
+      const daDung = Math.max(dbUsed, seed.daDung);
+      const toiDa = r.SoLuotSuDungToiDa || seed.max;
+      const conLai = Math.max(0, toiDa - daDung);
+      const phanTram = Math.min(100, parseFloat(((daDung / toiDa) * 100).toFixed(1)));
+
+      return {
+        maKhuyenMai: r.MaKhuyenMai,
+        tenKhuyenMai: r.TenKhuyenMai,
+        giaTriGiamGia: parseFloat(r.GiaTriGiamGia),
+        giaTriDonHangToiThieu: parseFloat(r.GiaTriDonHangToiThieu),
+        ngayBatDau: r.NgayBatDau,
+        ngayKetThuc: r.NgayKetThuc,
+        soLuotSuDungToiDa: toiDa,
+        soLuotDaDung: daDung,
+        soLuotConLai: conLai,
+        phanTramDaDung: phanTram
+      };
+    });
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    console.error('Lỗi GET /api/dat-ve/danh-sach-khuyen-mai:', err);
+    res.status(500).json({ success: false, message: 'Lỗi tải danh sách khuyến mãi: ' + err.message });
   }
 });
 

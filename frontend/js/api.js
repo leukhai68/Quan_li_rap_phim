@@ -124,6 +124,11 @@ const Api = {
     return this.request(`/suat-chieu/${id}`);
   },
 
+  // ─── KHUYẾN MÃI ────────────────────────────────────────────────────────
+  async getKhuyenMai() {
+    return this.request('/dat-ve/danh-sach-khuyen-mai');
+  },
+
   // ─── SẢN PHẨM BẮP NƯỚC ─────────────────────────────────────────────────────
   async getSanPham(loai = '') {
     const query = loai ? `?loai=${encodeURIComponent(loai)}` : '';
