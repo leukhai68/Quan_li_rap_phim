@@ -180,12 +180,13 @@ router.post('/', authenticateToken, requireRole('khach_hang'), async (req, res) 
     // 6. Xử lý khuyến mãi nếu có
     let soTienGiamGia = 0;
     let maKMValid = null;
-    if (maKhuyenMai && ['KM001', 'KM002', 'KM003', 'KM005'].includes(maKhuyenMai)) {
+    const cleanKM = maKhuyenMai ? maKhuyenMai.toString().trim().toUpperCase() : null;
+    if (cleanKM && ['KM001', 'KM002', 'KM003', 'KM004'].includes(cleanKM)) {
       const [kmRows] = await conn.execute(
         `SELECT * FROM KHUYEN_MAI 
          WHERE MaKhuyenMai = ? 
            AND CURDATE() BETWEEN NgayBatDau AND NgayKetThuc`,
-        [maKhuyenMai]
+        [cleanKM]
       );
       if (kmRows.length > 0) {
         const km = kmRows[0];
@@ -200,8 +201,8 @@ router.post('/', authenticateToken, requireRole('khach_hang'), async (req, res) 
           }
         }
 
-        // KM005: Combo tiết kiệm (Phải có mua kèm bắp nước / combo)
-        if (km.MaKhuyenMai === 'KM005') {
+        // KM004: Combo tiết kiệm (Phải có mua kèm bắp nước / combo)
+        if (km.MaKhuyenMai === 'KM004') {
           if (!danhSachSanPham || danhSachSanPham.length === 0) {
             isValidConditions = false;
           }
@@ -346,7 +347,7 @@ router.get('/danh-sach-khuyen-mai', async (req, res) => {
         ROUND(LEAST(100, (COUNT(dv.MaDatVe) / NULLIF(km.SoLuotSuDungToiDa, 0)) * 100), 1) AS PhanTramDaDung
       FROM KHUYEN_MAI km
       LEFT JOIN DAT_VE dv ON dv.MaKhuyenMai = km.MaKhuyenMai
-      WHERE km.MaKhuyenMai IN ('KM001', 'KM002', 'KM003', 'KM005')
+      WHERE km.MaKhuyenMai IN ('KM001', 'KM002', 'KM003', 'KM004')
       GROUP BY 
         km.MaKhuyenMai, km.TenKhuyenMai, km.GiaTriGiamGia, km.GiaTriDonHangToiThieu,
         km.NgayBatDau, km.NgayKetThuc, km.SoLuotSuDungToiDa
@@ -358,10 +359,10 @@ router.get('/danh-sach-khuyen-mai', async (req, res) => {
       'KM001': { daDung: 320, max: 500 },
       'KM002': { daDung: 145, max: 200 },
       'KM003': { daDung: 820, max: 1000 },
-      'KM005': { daDung: 410, max: 800 }
+      'KM004': { daDung: 410, max: 800 }
     };
 
-    const validCodes = ['KM001', 'KM002', 'KM003', 'KM005'];
+    const validCodes = ['KM001', 'KM002', 'KM003', 'KM004'];
     const result = rows
       .filter(r => validCodes.includes(r.MaKhuyenMai))
       .map(r => {

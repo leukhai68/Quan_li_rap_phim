@@ -193,7 +193,7 @@ Trang giao diện: **`frontend/nhanvien.html`**
 | Method | Endpoint | Mô tả |
 | :--- | :--- | :--- |
 | `GET` | `/api/san-pham` | Danh sách bắp nước, combo |
-| `GET` | `/api/dat-ve/danh-sach-khuyen-mai` | [MỚI] Danh sách 4 khuyến mãi khả dụng (KM001, KM002, KM003, KM005) kèm số lượt đã dùng, còn lại và thang % |
+| `GET` | `/api/dat-ve/danh-sach-khuyen-mai` | [MỚI] Danh sách 4 khuyến mãi khả dụng (KM001, KM002, KM003, KM004) kèm số lượt đã dùng, còn lại và thang % |
 | `POST` | `/api/dat-ve` | Tạo đơn đặt vé, giữ ghế, chọn sản phẩm và áp dụng khuyến mãi |
 | `GET` | `/api/lich-su` | Tra cứu lịch sử đặt vé |
 
@@ -211,16 +211,14 @@ Trang giao diện: **`frontend/nhanvien.html`**
 
 ## 🎟️ Cập nhật Bảng Giá Vé & Khuyến Mãi (Mới Nhất)
 
-1. **Cơ sở dữ liệu Khuyến mãi & Loại bỏ hoàn toàn KM004, KM006**:
-   - Bảng `KHUYEN_MAI` chỉ lưu đúng 4 bản ghi khả dụng: `KM001` (Ưu đãi thành viên), `KM002` (Ưu đãi sinh viên), `KM003` (Giảm giá cuối tuần), `KM005` (Combo tiết kiệm).
-   - Đã loại bỏ hoàn toàn các mã `KM004` (Khách hàng mới) và `KM006` (Ngày lễ) khỏi CSDL gốc, API backend và danh sách lựa chọn frontend.
+1. **Cơ sở dữ liệu Khuyến mãi (Chuẩn hóa 4 mã KM001 đến KM004)**:
+   - Bảng `KHUYEN_MAI` lưu đúng 4 bản ghi khả dụng: `KM001` (Ưu đãi thành viên), `KM002` (Ưu đãi sinh viên), `KM003` (Giảm giá cuối tuần), `KM004` (Combo tiết kiệm - trước đây là KM005 đổi sang KM004).
+   - Đã loại bỏ hoàn toàn các mã không dùng (`KM006`) khỏi CSDL gốc, API backend và danh sách lựa chọn frontend.
    - **Câu lệnh SQL cập nhật an toàn (chống lỗi khóa ngoại)**:
      ```sql
-     -- 1. Gỡ liên kết trong bảng DAT_VE nếu có dữ liệu cũ tham chiếu tới KM004 hoặc KM006
-     UPDATE DAT_VE SET MaKhuyenMai = NULL WHERE MaKhuyenMai IN ('KM004', 'KM006');
-
-     -- 2. Xóa bỏ hoàn toàn 2 mã khuyến mãi KM004 và KM006
-     DELETE FROM KHUYEN_MAI WHERE MaKhuyenMai IN ('KM004', 'KM006');
+     -- Cập nhật đổi tên mã KM005 thành KM004
+     UPDATE DAT_VE SET MaKhuyenMai = 'KM004' WHERE MaKhuyenMai = 'KM005';
+     UPDATE KHUYEN_MAI SET MaKhuyenMai = 'KM004' WHERE MaKhuyenMai = 'KM005';
      ```
 
 2. **Bảng Giá Vé (`frontend/giave.html`)**:
@@ -236,7 +234,7 @@ Trang giao diện: **`frontend/nhanvien.html`**
    - Hệ thống trang bị hàm kiểm tra tính hợp lệ `checkPromoEligibility(promoCode, subTotal, snackTotal)` và tự động lấy thông tin ngày chiếu qua `getShowtimeInfo()`:
      - **Mã `KM003` (Giảm giá cuối tuần)**: **Chỉ áp dụng cho các suất chiếu diễn ra vào Thứ Bảy & Chủ Nhật** và đơn hàng tối thiểu 80.000đ. Nếu kiểm thử với suất chiếu ngày thường (ví dụ: Thứ Ba ngày 20/10/2026), hệ thống sẽ từ chối áp dụng và hiển thị thông báo cảnh báo rõ ràng:
        > ⚠️ *Mã KM003 chỉ áp dụng cho suất chiếu Thứ Bảy & Chủ Nhật. Suất chiếu đang chọn diễn ra vào Thứ Ba (09:00 20/10/2026).*
-     - **Mã `KM005` (Combo tiết kiệm)**: Bắt buộc đơn hàng phải mua kèm ít nhất 1 phần bắp nước hoặc combo (`snackTotal > 0`) và đơn từ 60.000đ. Nếu chưa chọn bắp nước, hệ thống báo:
+     - **Mã `KM004` (Combo tiết kiệm)**: Bắt buộc đơn hàng phải mua kèm ít nhất 1 phần bắp nước hoặc combo (`snackTotal > 0`) và đơn từ 60.000đ. Nếu chưa chọn bắp nước, hệ thống báo:
        > ⚠️ *Mã combo tiết kiệm yêu cầu mua kèm ít nhất 1 phần Bắp nước hoặc Combo ở mục '3. Chọn bắp nước & Combo'.*
      - **Mã `KM001` (Ưu đãi thành viên)**: Kiểm tra tài khoản thành viên đã đăng nhập và đơn từ 50.000đ.
      - **Mã `KM002` (Ưu đãi sinh viên)**: Áp dụng đơn từ 40.000đ (Lưu ý xuất trình thẻ HSSV/CCCD khi nhận vé tại quầy).

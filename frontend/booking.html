@@ -508,14 +508,14 @@
             <strong id="applied-promo-value">-5.000đ</strong>
           </div>
 
-          <!-- Bộ chọn mã khuyến mãi khả dụng (KM001, KM002, KM003, KM005) -->
+          <!-- Bộ chọn mã khuyến mãi khả dụng (KM001, KM002, KM003, KM004) -->
           <div class="promo-selector-wrap" style="margin:8px 0 6px 0;">
             <select id="promo-code-select" class="filter-select" style="width:100%; padding:7px 10px; font-size:.82rem; border:1.5px solid #cbd5e1; border-radius:6px; background-color:#f8fafc;" onchange="handlePromoChange()">
               <option value="">-- Chọn mã khuyến mãi --</option>
               <option value="KM001">KM001: Ưu đãi thành viên (-10k) | Đã dùng 64.0% - Còn 180 lượt</option>
               <option value="KM002">KM002: Ưu đãi sinh viên (-5k) | Đã dùng 72.5% - Còn 55 lượt</option>
               <option value="KM003">KM003: Giảm giá cuối tuần (-15k) | Đã dùng 82.0% - Còn 180 lượt</option>
-              <option value="KM005">KM005: Combo tiết kiệm (-10k) | Đã dùng 51.3% - Còn 390 lượt</option>
+              <option value="KM004">KM004: Combo tiết kiệm (-10k) | Đã dùng 51.3% - Còn 390 lượt</option>
             </select>
           </div>
 
@@ -935,7 +935,7 @@
      * - Đối tượng sử dụng (Thành viên / Sinh viên / Khách hàng)
      * - Thời điểm sử dụng (Thứ 7 & CN đối với KM003)
      * - Giá trị đơn hàng tối thiểu
-     * - Điều kiện kèm bắp nước đối với KM005
+     * - Điều kiện kèm bắp nước đối với KM004
      */
     function checkPromoEligibility(promoCode, subTotal, snackTotal) {
       if (!promoCode || !PROMO_DATA[promoCode]) {
@@ -981,7 +981,7 @@
         };
       }
 
-      if (promoCode === 'KM005') {
+      if (promoCode === 'KM004') {
         // Combo tiết kiệm: Bắt buộc phải có mua bắp nước / combo
         if (!snackTotal || snackTotal <= 0) {
           return {
@@ -1132,7 +1132,7 @@
       'KM001': { code: 'KM001', name: 'Ưu đãi thành viên', discount: 10000, minOrder: 50000, max: 500, used: 320 },
       'KM002': { code: 'KM002', name: 'Ưu đãi sinh viên', discount: 5000, minOrder: 40000, max: 200, used: 145 },
       'KM003': { code: 'KM003', name: 'Giảm giá cuối tuần', discount: 15000, minOrder: 80000, max: 1000, used: 820 },
-      'KM005': { code: 'KM005', name: 'Combo tiết kiệm', discount: 10000, minOrder: 60000, max: 800, used: 410 }
+      'KM004': { code: 'KM004', name: 'Combo tiết kiệm', discount: 10000, minOrder: 60000, max: 800, used: 410 }
     };
     let currentPromoCode = '';
 
@@ -1215,7 +1215,7 @@
           const res = await Api.getKhuyenMai();
           if (res && res.success && Array.isArray(res.data)) {
             const select = document.getElementById('promo-code-select');
-            const validCodes = ['KM001', 'KM002', 'KM003', 'KM005'];
+            const validCodes = ['KM001', 'KM002', 'KM003', 'KM004'];
             const validPromos = res.data.filter(item => validCodes.includes(item.maKhuyenMai));
 
             validPromos.forEach(item => {
@@ -1227,7 +1227,7 @@
               }
             });
 
-            // Cập nhật text trong select option: Tuyệt đối chỉ render 4 mã KM001, KM002, KM003, KM005
+            // Cập nhật text trong select option: Tuyệt đối chỉ render 4 mã KM001, KM002, KM003, KM004
             if (select) {
               const currentVal = select.value;
               select.innerHTML = '<option value="">-- Chọn mã khuyến mãi --</option>' + validPromos.map(item => {
