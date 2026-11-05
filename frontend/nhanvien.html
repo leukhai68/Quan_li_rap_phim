@@ -4,6 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quản lý Nhân viên - PTIT Cinema</title>
+  <script>
+    // Kiểm tra nhanh quyền Quản lý tránh hiển thị giao diện cho nhân viên không có quyền
+    (function() {
+      try {
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const role = localStorage.getItem('userRole');
+        if (!isLoggedIn || role !== 'nhan_vien') {
+          window.location.replace('login.html');
+          return;
+        }
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const viTri = (user && user.viTriCongViec) ? user.viTriCongViec.toLowerCase() : '';
+        const isAdmin = viTri.includes('quản lý') || viTri.includes('quản trị') || viTri.includes('admin') || viTri.includes('chủ hệ thống');
+        if (!isAdmin) {
+          window.location.replace('checkin.html');
+        }
+      } catch (e) {
+        window.location.replace('checkin.html');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>

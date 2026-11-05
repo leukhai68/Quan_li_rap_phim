@@ -48,6 +48,13 @@ const Api = {
     return this.isLoggedIn() && localStorage.getItem('userRole') === 'nhan_vien';
   },
 
+  isAdmin() {
+    if (!this.isStaff()) return false;
+    const user = this.getUser();
+    const viTri = (user && user.viTriCongViec) ? user.viTriCongViec.toLowerCase() : '';
+    return viTri.includes('quản lý') || viTri.includes('quản trị') || viTri.includes('admin') || viTri.includes('chủ hệ thống');
+  },
+
   // Helper fetch kèm Auth header & JSON parsing
   async request(endpoint, options = {}) {
     const headers = {

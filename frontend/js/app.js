@@ -429,8 +429,10 @@ function checkAuthState() {
   // Điều chỉnh các mục trong menu chính theo phân quyền (Nhân viên vs Khách hàng)
   if (mainNav) {
     const historyLinks = mainNav.querySelectorAll('a[href*="booking-history.html"]');
+    const nvLinks = mainNav.querySelectorAll('a[href*="nhanvien.html"]');
+
     if (isLoggedIn && userRole === 'nhan_vien') {
-      // Nhân viên soát vé: Ẩn "Lịch sử đặt vé" vì nhân viên không dùng trang cá nhân này
+      // Nhân viên: Ẩn "Lịch sử đặt vé" vì nhân viên không dùng trang cá nhân này
       historyLinks.forEach(link => link.style.display = 'none');
       
       // Thêm nút "Soát vé / Check-in" vào thanh menu nếu chưa có
@@ -442,20 +444,31 @@ function checkAuthState() {
         mainNav.appendChild(checkinNav);
       }
 
-      // Thêm nút "Quản lý NV" cho nhân viên có chức vụ Quản lý / Quản lý ca
-      const user = Api.getUser();
+      // Nút "Quản lý NV" CHỈ hiển thị cho nhân viên có chức vụ Quản lý / Quản trị viên
+      const user = (window.Api && window.Api.getUser) ? window.Api.getUser() : null;
       const viTri = (user && user.viTriCongViec) ? user.viTriCongViec.toLowerCase() : '';
-      const isAdmin = viTri.includes('quản lý') || viTri.includes('quản trị') || viTri.includes('admin') || viTri.includes('chủ hệ thống');
-      if (isAdmin && !mainNav.querySelector('a[href*="nhanvien.html"]')) {
-        const nvNav = document.createElement('a');
-        nvNav.href = 'nhanvien.html';
-        nvNav.className = 'nav-link' + (window.location.pathname.includes('nhanvien.html') ? ' active' : '');
-        nvNav.innerHTML = '<i class="fa-solid fa-user-tie"></i> Quản lý NV';
-        mainNav.appendChild(nvNav);
+      const isAdmin = (window.Api && window.Api.isAdmin)
+        ? window.Api.isAdmin()
+        : (viTri.includes('quản lý') || viTri.includes('quản trị') || viTri.includes('admin') || viTri.includes('chủ hệ thống'));
+
+      if (isAdmin) {
+        if (!mainNav.querySelector('a[href*="nhanvien.html"]')) {
+          const nvNav = document.createElement('a');
+          nvNav.href = 'nhanvien.html';
+          nvNav.className = 'nav-link' + (window.location.pathname.includes('nhanvien.html') ? ' active' : '');
+          nvNav.innerHTML = '<i class="fa-solid fa-user-tie"></i> Quản lý NV';
+          mainNav.appendChild(nvNav);
+        } else {
+          nvLinks.forEach(link => link.style.display = '');
+        }
+      } else {
+        // Nhân viên không phải Quản lý: Loại bỏ hoàn toàn nút "Quản lý NV"
+        nvLinks.forEach(link => link.remove());
       }
     } else {
-      // Khách hàng hoặc chưa đăng nhập: Giữ hiển thị bình thường
+      // Khách hàng hoặc chưa đăng nhập: Giữ hiển thị bình thường, xóa link Quản lý NV
       historyLinks.forEach(link => link.style.display = '');
+      nvLinks.forEach(link => link.remove());
     }
   }
 

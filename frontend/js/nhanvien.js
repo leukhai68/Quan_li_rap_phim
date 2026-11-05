@@ -48,6 +48,12 @@ function checkPermission() {
     return false;
   }
 
+  if (!Api.isAdmin()) {
+    alert('Bạn không có quyền Quản lý nhân viên! Chỉ Quản lý / Quản trị viên mới được phép truy cập.');
+    window.location.href = 'checkin.html';
+    return false;
+  }
+
   // Cập nhật thông tin profile trên header
   const staffName = document.getElementById('staff-name');
   const staffRole = document.getElementById('staff-role');
