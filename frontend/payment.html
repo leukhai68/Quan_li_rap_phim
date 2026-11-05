@@ -477,7 +477,7 @@
         <div class="p-card">
           <h2 class="p-title"><i class="fa-solid fa-clapperboard"></i> Thông tin Suất chiếu</h2>
           <div class="movie-banner-card">
-            <img id="m-poster" src="" alt="Poster" class="movie-poster-img" onerror="this.src='https://placehold.co/120x170?text=Phim';" />
+            <img id="m-poster" src="" alt="Poster" class="movie-poster-img" onerror="if (!this.dataset.triedFallback) { this.dataset.triedFallback = '1'; this.src = 'http://localhost:5000/' + this.getAttribute('data-original-src'); } else { this.onerror = null; this.src = 'https://placehold.co/120x170?text=Phim'; }" />
             <div class="movie-info-wrap">
               <div class="movie-title-text" id="m-title">Đang tải tên phim...</div>
               <div class="info-item"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> <span>Thời lượng: <strong id="m-duration">...</strong></span></div>
@@ -714,9 +714,17 @@
       document.getElementById('payment-content').style.display = 'grid';
 
       // 1. Phim & Suất chiếu
+      // getMoviePoster() expects PascalCase keys (MaPhim, Poster, TenPhim)
+      // but the booking API returns camelCase → map accordingly
+      const phimForPoster = {
+        MaPhim: b.phim.maPhim,
+        TenPhim: b.phim.tenPhim,
+        Poster: b.phim.poster
+      };
       const poster = (typeof getMoviePoster === 'function') 
-        ? getMoviePoster(b.phim) 
+        ? getMoviePoster(phimForPoster) 
         : (b.phim.poster || 'https://placehold.co/120x170?text=Phim');
+      document.getElementById('m-poster').setAttribute('data-original-src', poster);
       document.getElementById('m-poster').src = poster;
       document.getElementById('m-title').textContent = b.phim.tenPhim;
       document.getElementById('m-duration').textContent = `${b.phim.thoiLuong} phút • ${b.phim.gioiHanDoTuoi ? `T${b.phim.gioiHanDoTuoi}` : 'P'}`;
