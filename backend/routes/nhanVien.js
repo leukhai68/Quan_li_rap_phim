@@ -87,8 +87,10 @@ router.get('/', authenticateToken, requireRole('nhan_vien'), requireAdmin, async
     // Validate cột sắp xếp an toàn
     const allowedSorts = ['NgayVaoLam', 'ViTriCongViec', 'HoTen', 'MaNhanVien', 'LuongCoBan', 'TongLuong', 'NgaySinh'];
     let safeSortBy = 'nv.NgayVaoLam';
-    if (sortBy === 'TongLuong' || sortBy === 'LuongCoBan') {
+    if (sortBy === 'TongLuong') {
       safeSortBy = 'TongLuong';
+    } else if (sortBy === 'LuongCoBan') {
+      safeSortBy = 'nv.LuongCoBan';
     } else if (allowedSorts.includes(sortBy)) {
       safeSortBy = `nv.${sortBy}`;
     }
@@ -106,13 +108,13 @@ router.get('/', authenticateToken, requireRole('nhan_vien'), requireAdmin, async
     const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
     const offset = (pageNum - 1) * limitNum;
 
-    // Lấy danh sách nhân viên (kèm số lượt check-in và Tổng Lương thưởng thêm 10.000đ/lượt)
+    // Lấy danh sách nhân viên (kèm số lượt check-in và Tổng Lương tính động = Lương cơ bản + 10.000đ/lượt check-in)
     const [rows] = await db.query(
       `SELECT nv.MaNhanVien, nv.HoTen, nv.NgaySinh, nv.SoDienThoai, nv.DiaChi,
               nv.NgayVaoLam, nv.ViTriCongViec, nv.LuongCoBan,
               COALESCE(ci.soLuotCheckIn, 0) AS SoLuotCheckIn,
               (COALESCE(ci.soLuotCheckIn, 0) * 10000) AS TienThuongCheckIn,
-              COALESCE(nv.TongLuong, (nv.LuongCoBan + COALESCE(ci.soLuotCheckIn, 0) * 10000)) AS TongLuong,
+              (nv.LuongCoBan + COALESCE(ci.soLuotCheckIn, 0) * 10000) AS TongLuong,
               COALESCE(nv.TrangThai, 'Đang làm') AS TrangThai
        FROM NHAN_VIEN nv
        LEFT JOIN (
@@ -176,7 +178,7 @@ router.get('/:id', authenticateToken, requireRole('nhan_vien'), requireAdmin, as
 
     const [rows] = await db.execute(
       `SELECT nv.MaNhanVien, nv.HoTen, nv.NgaySinh, nv.SoDienThoai, nv.DiaChi,
-              nv.NgayVaoLam, nv.ViTriCongViec, nv.LuongCoBan, nv.TongLuong,
+              nv.NgayVaoLam, nv.ViTriCongViec, nv.LuongCoBan,
               COALESCE(nv.TrangThai, 'Đang làm') AS TrangThai
        FROM NHAN_VIEN nv
        WHERE nv.MaNhanVien = ?`,
@@ -195,7 +197,7 @@ router.get('/:id', authenticateToken, requireRole('nhan_vien'), requireAdmin, as
     const soLuotCheckIn = checkInCount[0].soLuotCheckIn || 0;
     const tienThuongCheckIn = soLuotCheckIn * 10000;
     const luongCoBan = parseFloat(rows[0].LuongCoBan) || 0;
-    const tongLuong = rows[0].TongLuong ? parseFloat(rows[0].TongLuong) : (luongCoBan + tienThuongCheckIn);
+    const tongLuong = luongCoBan + tienThuongCheckIn;
 
     // Lấy 15 bản ghi lịch sử soát vé gần nhất
     const [recentCheckins] = await db.execute(
@@ -311,8 +313,8 @@ router.post('/', authenticateToken, requireRole('nhan_vien'), requireAdmin, asyn
     const ngayVaoLamVal = ngayVaoLam ? ngayVaoLam : new Date().toISOString().split('T')[0];
 
     await db.execute(
-      `INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVaoLam, ViTriCongViec, LuongCoBan, TongLuong, MatKhau, TrangThai)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Đang làm')`,
+      `INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVaoLam, ViTriCongViec, LuongCoBan, MatKhau, TrangThai)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Đang làm')`,
       [
         maNhanVien,
         hoTen.trim(),
@@ -322,7 +324,6 @@ router.post('/', authenticateToken, requireRole('nhan_vien'), requireAdmin, asyn
         ngayVaoLamVal,
         viTriCongViec.trim(),
         Number(luongCoBan),
-        Number(luongCoBan), // Tổng Lương ban đầu bằng Lương cơ bản
         passToSave
       ]
     );
@@ -394,19 +395,11 @@ router.put('/:id', authenticateToken, requireRole('nhan_vien'), requireAdmin, as
       }
     }
 
-    // Tính lại Tổng Lương: Lương cơ bản mới + (Số lượt check-in * 10.000đ)
-    const [ciCount] = await db.execute(
-      `SELECT COUNT(*) AS cnt FROM CHECK_IN WHERE MaNhanVien = ?`,
-      [id]
-    );
-    const cntCheckIn = ciCount[0].cnt || 0;
-    const newTongLuong = Number(luongCoBan) + (cntCheckIn * 10000);
-
     // Nếu có truyền mật khẩu mới thì cập nhật mật khẩu, không thì giữ nguyên
     let updateSql = `
       UPDATE NHAN_VIEN SET 
         HoTen = ?, NgaySinh = ?, SoDienThoai = ?, DiaChi = ?, 
-        NgayVaoLam = ?, ViTriCongViec = ?, LuongCoBan = ?, TongLuong = ?
+        NgayVaoLam = ?, ViTriCongViec = ?, LuongCoBan = ?
     `;
     const updateParams = [
       hoTen.trim(),
@@ -415,8 +408,7 @@ router.put('/:id', authenticateToken, requireRole('nhan_vien'), requireAdmin, as
       diaChi ? diaChi.trim() : null,
       ngayVaoLam || null,
       viTriCongViec.trim(),
-      Number(luongCoBan),
-      newTongLuong
+      Number(luongCoBan)
     ];
 
     if (matKhau && matKhau.trim()) {

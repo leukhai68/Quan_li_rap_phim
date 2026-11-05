@@ -1,8 +1,7 @@
-
 CREATE DATABASE IF NOT EXISTS QuanLyRapChieuPhim_Final
     CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE QuanLyRapChieuPhim_Final;
-
+SET SQL_SAFE_UPDATES = 0;
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS CHECK_IN;
 DROP TABLE IF EXISTS MUA_KEM;
@@ -119,11 +118,9 @@ CREATE TABLE NHAN_VIEN (
     NgayVaoLam DATE,
     ViTriCongViec VARCHAR(100),
     LuongCoBan DECIMAL(12,2) NOT NULL,
-    TongLuong DECIMAL(12,2) NOT NULL DEFAULT 0,
-    MatKhau VARCHAR(255) NOT NULL DEFAULT '123456',
+	MatKhau VARCHAR(255) NOT NULL DEFAULT '123456',
     TrangThai ENUM('Đang làm', 'Nghỉ việc') NOT NULL DEFAULT 'Đang làm',
-    CHECK (LuongCoBan >= 0),
-    CHECK (TongLuong >= 0)
+    CHECK (LuongCoBan >= 0)
 ) ENGINE=InnoDB;
 
 -- 10. KHUYEN_MAI
@@ -184,7 +181,7 @@ CREATE TABLE DAT_VE (
 -- 13. VE
 -- Suat chieu cua ve duoc xac dinh qua DAT_VE.MaSuatChieu.
 -- UNIQUE(MaDatVe, MaGhe) tranh trung ghe trong cung don.
--- Trigger can bo sung de tranh ban cung ghe cho hai don cua cung suat.
+
 CREATE TABLE VE (
     MaVe VARCHAR(12) PRIMARY KEY,
     MaDatVe VARCHAR(10) NOT NULL,
@@ -214,7 +211,7 @@ CREATE TABLE MUA_KEM (
 
 -- 15. CHECK_IN
 -- UNIQUE(MaVe) dam bao moi ve chi co toi da mot ban ghi check-in.
--- Dieu kien ve da thanh toan/chua huy can duoc kiem tra bang trigger/transaction.
+
 CREATE TABLE CHECK_IN (
     MaCheckIn VARCHAR(10) PRIMARY KEY,
     MaVe VARCHAR(12) NOT NULL UNIQUE,
@@ -253,8 +250,8 @@ INSERT INTO PHIM (MaPhim, TenPhim, ThoiLuong, QuocGia, NgonNgu, GioiHanDoTuoi, N
 ('P008', 'Shaun the Sheep: Quái Lạ Ghé Nhà', 88, 'Anh', 'Lồng tiếng Việt', 0, '2026-10-16', '2026-11-30', 'Đang chiếu', 'anh_video/Shaun_the_Sheep_Farmageddon_poster_pillars.jpg', 'anh_video/Shaun the Sheep Movie 2： Farmageddon – Official Trailer.mp4'),
 ('P009', 'Chuyện Công Chúa Kaguya', 137, 'Nhật Bản', 'Phụ đề Việt', 0, '2026-10-09', '2026-11-15', 'Đang chiếu', 'anh_video/The_Tale_of_the_Princess_Kaguya_(poster).jpg', 'anh_video/The Tale Of The Princess Kaguya - Official Trailer.mp4'),
 ('P010', 'Mẹ Mìn', 99, 'Việt Nam', 'Tiếng Việt', 16, '2026-10-23', '2026-12-05', 'Đang chiếu', 'anh_video/ME-MIN-POSTER-CONG-VIEN-KTHUOC-SOCIAL-1.jpg', 'anh_video/MẸ MÌN ｜ TEASER TRAILER ｜ SUẤT CHIẾU ĐẶC BIỆT TỪ 18H NGÀY 20.10.2026.mp4'),
-('P011', 'Trấn Yểm', 96, 'Việt Nam', 'Tiếng Việt', 18, '2026-10-30', '2026-12-15', 'Sắp chiếu', 'anh_video/tran-yem-500_1778642449288.jpg', 'anh_video/Xóm nhỏ ｜ Trailer Official ｜ Phim ĐỜI SỐNG ĐÔ THỊ ｜ Phim VTV Mới Nhất 2026.mp4'),
-('P012', 'Clayface', 120, 'Hoa Kỳ', 'Phụ đề Việt', 16, '2026-11-06', '2026-12-31', 'Sắp chiếu', 'anh_video/MV5BMjNlMjM4NTAtYjE5YS00ZGYyLWEyMTYtNjFlMmIxZDEzYjhhXkEyXkFqcGc@._V1_.jpg', 'anh_video/Clayface ｜ Official Teaser.mp4'),
+('P011', 'Trấn Yểm', 96, 'Việt Nam', 'Tiếng Việt', 18, '2026-10-30', '2026-12-15', 'Đang chiếu', 'anh_video/tran-yem-500_1778642449288.jpg', 'anh_video/Xóm nhỏ ｜ Trailer Official ｜ Phim ĐỜI SỐNG ĐÔ THỊ ｜ Phim VTV Mới Nhất 2026.mp4'),
+('P012', 'Clayface', 120, 'Hoa Kỳ', 'Phụ đề Việt', 16, '2026-11-06', '2026-12-31', 'Sắp chiếu', 'anh_video/MV5BMjNlMjM4NTAtYjE5OS00ZGYyLWEyMTYtNjFlMmIxZDEzYjhhXkEyXkFqcGc@._V1_.jpg', 'anh_video/Clayface ｜ Official Teaser.mp4'),
 ('P013', 'Toy Story 5', 100, 'Hoa Kỳ', 'Lồng tiếng Việt', 0, '2026-11-20', '2027-01-15', 'Sắp chiếu', 'anh_video/target_payoff_poster_united_kingdom_d19f38c5.jpeg', 'anh_video/Toy Story 5 ｜ Teaser Trailer ｜ In Theaters June 19.mp4'),
 ('P014', 'Dune: Part Three', 165, 'Hoa Kỳ', 'Phụ đề Việt', 16, '2026-12-18', '2027-02-28', 'Sắp chiếu', 'anh_video/MV5BYjk1NjgwZDMtYzI5OS00Y2Q4LWI1NmItNTE5OGU2NDVmMTAxXkEyXkFqcGc@._V1_.jpg', 'anh_video/Dune： Part Three ｜ Official Teaser Trailer.mp4'),
 ('P015', 'Avengers: Doomsday', 180, 'Hoa Kỳ', 'Phụ đề Việt', 13, '2026-12-18', '2027-02-28', 'Sắp chiếu', 'anh_video/sLYCyO58UvBuBtbHTQjPCCgJ4dG.webp', 'anh_video/AVENGERS 5： DOOMSDAY Official “Steve Rogers Meets New Avengers” Teaser Trailer (2026).mp4'),
@@ -295,12 +292,12 @@ INSERT INTO PHIM_THE_LOAI (MaPhim, MaTheLoai) VALUES
 ('P016','TL08');
 
 INSERT INTO PHONG_CHIEU (MaPhong, TenPhong, LoaiPhong, SucChuaToiDa) VALUES
-('PC01','Phòng 1','2D',100),
-('PC02','Phòng 2','3D',50),
-('PC03','Phòng 3','2D',60),
-('PC04','Phòng 4','3D',80),
-('PC05','Phòng 5','IMAX',120),
-('PC06','Phòng 6','2D',40);
+('PC01','Phòng 1','2D',30),
+('PC02','Phòng 2','3D',20),
+('PC03','Phòng 3','2D',32),
+('PC04','Phòng 4','3D',32),
+('PC05','Phòng 5','IMAX',50),
+('PC06','Phòng 6','2D',18);
 
 INSERT INTO LOAI_GHE (MaLoaiGhe, TenLoaiGhe, DonGiaCoBan) VALUES
 ('LG01','Thường',75000),
@@ -492,30 +489,30 @@ INSERT INTO GHE (MaGhe, HangGhe, SoGhe, MaPhong, MaLoaiGhe) VALUES
 ('G06C06','C',6,'PC06','LG03');
 
 INSERT INTO SUAT_CHIEU (MaSuatChieu, ThoiGianBatDau, ThoiGianKetThuc, TrangThai, MaPhim, MaPhong) VALUES
-('SC001','2026-10-20 09:00:00','2026-10-20 11:11:00','Đã chiếu','P001','PC01'),
-('SC002','2026-10-20 13:00:00','2026-10-20 15:12:00','Đã chiếu','P002','PC01'),
-('SC003','2026-10-21 19:00:00','2026-10-21 20:40:00','Sắp chiếu','P003','PC02'),
-('SC004','2026-10-22 09:30:00','2026-10-22 11:05:00','Sắp chiếu','P004','PC02'),
-('SC005','2026-10-21 10:00:00','2026-10-21 12:08:00','Đã chiếu','P005','PC03'),
-('SC006','2026-10-21 14:00:00','2026-10-21 15:45:00','Đã chiếu','P006','PC04'),
-('SC007','2026-10-21 17:00:00','2026-10-21 18:52:00','Đã chiếu','P008','PC06'),
-('SC008','2026-10-21 20:00:00','2026-10-21 21:59:00','Sắp chiếu','P009','PC03'),
-('SC009','2026-10-22 12:00:00','2026-10-22 14:04:00','Sắp chiếu','P007','PC04'),
-('SC010','2026-10-22 15:00:00','2026-10-22 17:04:00','Sắp chiếu','P010','PC05'),
-('SC011','2026-10-22 18:00:00','2026-10-22 19:41:00','Sắp chiếu','P012','PC06'),
-('SC012','2026-10-23 09:00:00','2026-10-23 10:56:00','Sắp chiếu','P013','PC03'),
-('SC013','2026-10-23 12:00:00','2026-10-23 13:43:00','Sắp chiếu','P014','PC04'),
-('SC014','2026-10-23 15:00:00','2026-10-23 17:15:00','Sắp chiếu','P005','PC05'),
-('SC015','2026-10-23 19:00:00','2026-10-23 21:15:00','Sắp chiếu','P015','PC03'),
-('SC016','2026-10-24 10:00:00','2026-10-24 11:37:00','Sắp chiếu','P016','PC06'),
-('SC017','2026-10-24 13:00:00','2026-10-24 14:32:00','Sắp chiếu','P008','PC04'),
-('SC018','2026-10-24 16:00:00','2026-10-24 17:45:00','Sắp chiếu','P006','PC03'),
-('SC019','2026-10-24 19:00:00','2026-10-24 21:04:00','Sắp chiếu','P010','PC05'),
-('SC020','2026-10-25 09:30:00','2026-10-25 11:15:00','Sắp chiếu','P007','PC04'),
-('SC021','2026-10-25 12:00:00','2026-10-25 13:41:00','Sắp chiếu','P012','PC06'),
-('SC022','2026-10-25 15:00:00','2026-10-25 17:15:00','Sắp chiếu','P015','PC05'),
-('SC023','2026-10-25 18:00:00','2026-10-25 19:37:00','Sắp chiếu','P016','PC03'),
-('SC024','2026-10-26 20:00:00','2026-10-26 22:08:00','Sắp chiếu','P005','PC04');
+('SC001','2026-10-20 09:00:00','2026-10-20 11:08:00','Đã chiếu','P001','PC01'),
+('SC002','2026-10-20 13:00:00','2026-10-20 14:51:00','Đã chiếu','P002','PC01'),
+('SC003','2026-10-21 19:00:00','2026-10-21 20:55:00','Đã chiếu','P003','PC02'),
+('SC004','2026-10-22 09:30:00','2026-10-22 11:03:00','Đã chiếu','P004','PC02'),
+('SC005','2026-10-21 10:00:00','2026-10-21 12:08:00','Đã chiếu','P001','PC03'),
+('SC006','2026-10-21 14:00:00','2026-10-21 15:55:00','Đã chiếu','P006','PC04'),
+('SC007','2026-10-21 17:00:00','2026-10-21 18:28:00','Đã chiếu','P008','PC06'),
+('SC008','2026-10-21 20:00:00','2026-10-21 22:17:00','Đã chiếu','P009','PC03'),
+('SC009','2026-10-22 12:00:00','2026-10-22 14:02:00','Đã chiếu','P007','PC04'),
+('SC010','2026-10-22 15:00:00','2026-10-22 17:08:00','Đã chiếu','P001','PC05'),
+('SC011','2026-10-22 18:00:00','2026-10-22 20:08:00','Đã chiếu','P001','PC06'),
+('SC012','2026-10-23 09:00:00','2026-10-23 11:08:00','Đã chiếu','P001','PC03'),
+('SC013','2026-10-23 12:00:00','2026-10-23 14:08:00','Đã chiếu','P001','PC04'),
+('SC014','2026-10-23 15:00:00','2026-10-23 16:50:00','Đã chiếu','P005','PC05'),
+('SC015','2026-10-23 19:00:00','2026-10-23 21:08:00','Đã chiếu','P001','PC03'),
+('SC016','2026-10-24 10:00:00','2026-10-24 12:08:00','Đã chiếu','P001','PC06'),
+('SC017','2026-10-24 13:00:00','2026-10-24 14:28:00','Đã chiếu','P008','PC04'),
+('SC018','2026-10-24 16:00:00','2026-10-24 17:55:00','Đã chiếu','P006','PC03'),
+('SC019','2026-10-24 19:00:00','2026-10-24 20:39:00','Đã chiếu','P010','PC05'),
+('SC020','2026-10-25 09:30:00','2026-10-25 11:32:00','Đã chiếu','P007','PC04'),
+('SC021','2026-10-25 12:00:00','2026-10-25 14:08:00','Đã chiếu','P001','PC06'),
+('SC022','2026-10-25 15:00:00','2026-10-25 17:08:00','Đã chiếu','P001','PC05'),
+('SC023','2026-10-25 18:00:00','2026-10-25 20:08:00','Đã chiếu','P001','PC03'),
+('SC024','2026-10-26 20:00:00','2026-10-26 21:50:00','Đã chiếu','P005','PC04');
 
 INSERT INTO KHACH_HANG (MaKhachHang, HoTen, SoDienThoai, Email, NgaySinh, NgayDangKy) VALUES
 ('KH001','Nguyễn Văn An','0912345678','an@example.com','2000-05-10','2026-01-05'),
@@ -552,16 +549,16 @@ INSERT INTO KHACH_HANG (MaKhachHang, HoTen, SoDienThoai, Email, NgaySinh, NgayDa
 ('KH032','Lý Tú Linh','0910253408','khach032@example.com','1995-09-26','2026-05-16'),
 ('KH033','Mai Lan Châu','0910261327','khach033@example.com','1998-04-04','2026-07-19');
 
-INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVaoLam, ViTriCongViec, LuongCoBan, TongLuong) VALUES
-('NV001','Phạm Thị Hoa','1995-04-12','0911111111','Hà Nội','2024-01-10','Thu ngân',8000000,8000000),
-('NV002','Nguyễn Văn Nam','1998-09-21','0922222222','Hà Nội','2023-06-15','Soát vé',7500000,7570000),
-('NV003','Trần Văn Minh','1990-02-03','0933333333','Hà Nội','2022-03-01','Quản lý',12000000,12000000),
-('NV004','Lê Thị Mai','1997-05-14','0944444444','Hà Đông, Hà Nội','2024-04-01','Thu ngân',7800000,7800000),
-('NV005','Phạm Quốc Bảo','1996-07-23','0955555555','Thanh Xuân, Hà Nội','2023-11-12','Soát vé',7600000,7620000),
-('NV006','Nguyễn Thu Trang','1999-01-09','0966666666','Cầu Giấy, Hà Nội','2025-02-10','Chăm sóc khách hàng',7200000,7200000),
-('NV007','Đỗ Minh Đức','1993-12-02','0977777777','Nam Từ Liêm, Hà Nội','2021-08-15','Kỹ thuật',9500000,9500000),
-('NV008','Vũ Ngọc Anh','1994-03-18','0988888888','Hoàng Mai, Hà Nội','2022-06-20','Quản lý ca',11000000,11010000),
-('NV009','Dương Quang Huy','2006-01-01','0123456789','Thái Tử Hà Thành','2026-10-26','Soát vé',100000,100000);
+INSERT INTO NHAN_VIEN (MaNhanVien, HoTen, NgaySinh, SoDienThoai, DiaChi, NgayVaoLam, ViTriCongViec, LuongCoBan) VALUES
+('NV001','Phạm Thị Hoa','1995-04-12','0911111111','Hà Nội','2024-01-10','Thu ngân',8000000),
+('NV002','Nguyễn Văn Nam','1998-09-21','0922222222','Hà Nội','2023-06-15','Soát vé',7500000),
+('NV003','Trần Văn Minh','1990-02-03','0933333333','Hà Nội','2022-03-01','Quản lý',12000000),
+('NV004','Lê Thị Mai','1997-05-14','0944444444','Hà Đông, Hà Nội','2024-04-01','Thu ngân',7800000),
+('NV005','Phạm Quốc Bảo','1996-07-23','0955555555','Thanh Xuân, Hà Nội','2023-11-12','Soát vé',7600000),
+('NV006','Nguyễn Thu Trang','1999-01-09','0966666666','Cầu Giấy, Hà Nội','2025-02-10','Chăm sóc khách hàng',7200000),
+('NV007','Đỗ Minh Đức','1993-12-02','0977777777','Nam Từ Liêm, Hà Nội','2021-08-15','Kỹ thuật',9500000),
+('NV008','Vũ Ngọc Anh','1994-03-18','0988888888','Hoàng Mai, Hà Nội','2022-06-20','Quản lý ca',11000000),
+('NV009','Dương Quang Huy','2006-01-01','0123456789','Thái Tử Hà Thành','2026-10-26','Soát vé',100000);
 
 UPDATE NHAN_VIEN SET TrangThai = 'Nghỉ việc' WHERE MaNhanVien = 'NV009';
 
@@ -598,26 +595,28 @@ INSERT INTO DAT_VE (MaDatVe, MaKhachHang, MaSuatChieu, ThoiGianDat, TongSoTien, 
 ('DV001','KH001','SC001','2026-10-19 10:00:00',120000,10000,110000,'Đã thanh toán','KM001'),
 ('DV002','KH002','SC002','2026-10-19 11:00:00',125000,0,125000,'Đã thanh toán',NULL),
 ('DV003','KH003','SC003','2026-10-19 12:00:00',80000,5000,75000,'Đã thanh toán','KM002'),
-('DV004','KH004','SC005','2026-10-19 13:15:00',115000,15000,100000,'Đã thanh toán','KM003'),
+('DV004','KH004','SC005','2026-10-19 13:15:00',135000,15000,120000,'Đã thanh toán','KM003'),
 ('DV005','KH005','SC006','2026-10-20 14:15:00',70000,10000,60000,'Đã thanh toán','KM004'),
-('DV006','KH006','SC007','2026-10-18 15:15:00',185000,0,185000,'Chưa thanh toán',NULL),
+('DV006','KH006','SC007','2026-10-18 15:15:00',168000,0,168000,'Chưa thanh toán',NULL),
 ('DV007','KH007','SC008','2026-10-19 16:15:00',70000,0,70000,'Đã thanh toán',NULL),
-('DV008','KH008','SC009','2026-10-20 17:15:00',115000,15000,100000,'Đã thanh toán','KM003'),
+('DV008','KH008','SC009','2026-10-20 17:15:00',118000,15000,103000,'Đã thanh toán','KM003'),
 ('DV009','KH009','SC010','2026-10-18 18:15:00',140000,0,140000,'Đã thanh toán',NULL),
-('DV010','KH010','SC011','2026-10-19 09:15:00',115000,10000,105000,'Đã thanh toán','KM004'),
+('DV010','KH010','SC011','2026-10-19 09:15:00',85000,10000,75000,'Đã thanh toán','KM004'),
 ('DV011','KH011','SC012','2026-10-20 10:15:00',70000,0,70000,'Đã thanh toán',NULL),
-('DV012','KH012','SC013','2026-10-18 11:15:00',185000,15000,170000,'Chưa thanh toán','KM003'),
+('DV012','KH012','SC013','2026-10-18 11:15:00',255000,15000,240000,'Chưa thanh toán','KM003'),
 ('DV013','KH013','SC014','2026-10-19 12:15:00',70000,0,70000,'Đã thanh toán',NULL),
-('DV014','KH014','SC015','2026-10-20 13:15:00',115000,0,115000,'Đã thanh toán',NULL),
+('DV014','KH014','SC015','2026-10-20 13:15:00',105000,0,105000,'Đã thanh toán',NULL),
 ('DV015','KH015','SC016','2026-10-18 14:15:00',140000,10000,130000,'Đã thanh toán','KM004'),
-('DV016','KH016','SC017','2026-10-19 15:15:00',115000,15000,100000,'Đã thanh toán','KM003'),
+('DV016','KH016','SC017','2026-10-19 15:15:00',128000,15000,113000,'Đã thanh toán','KM003'),
 ('DV017','KH017','SC018','2026-10-20 16:15:00',70000,0,70000,'Đã thanh toán',NULL),
-('DV018','KH018','SC019','2026-10-18 17:15:00',185000,0,185000,'Chưa thanh toán',NULL),
+('DV018','KH018','SC019','2026-10-18 17:15:00',158000,0,158000,'Chưa thanh toán',NULL),
 ('DV019','KH019','SC020','2026-10-19 18:15:00',70000,0,70000,'Đã thanh toán',NULL),
 ('DV020','KH020','SC021','2026-10-20 09:15:00',115000,15000,100000,'Đã thanh toán','KM003'),
 ('DV021','KH021','SC022','2026-10-18 10:15:00',140000,0,140000,'Đã thanh toán',NULL),
-('DV022','KH022','SC023','2026-10-19 11:15:00',115000,0,115000,'Đã thanh toán',NULL),
+('DV022','KH022','SC023','2026-10-19 11:15:00',155000,0,155000,'Đã thanh toán',NULL),
 ('DV023','KH023','SC024','2026-10-20 12:15:00',70000,0,70000,'Đã thanh toán',NULL);
+
+
 
 INSERT INTO VE (MaVe, MaDatVe, MaGhe, GiaVeTaiThoiDiemMua, TrangThaiVe) VALUES
 ('V001','DV001','G001',70000,'Đã check-in'),
@@ -627,19 +626,19 @@ INSERT INTO VE (MaVe, MaDatVe, MaGhe, GiaVeTaiThoiDiemMua, TrangThaiVe) VALUES
 ('V005','DV005','G04A02',70000,'Chưa sử dụng'),
 ('V006','DV006','G06A03',70000,'Chưa sử dụng'),
 ('V007','DV006','G06B04',70000,'Chưa sử dụng'),
-('V008','DV007','G03A04',70000,'Chưa sử dụng'),
+('V008','DV007','G03A04',70000,'Đã check-in'),
 ('V009','DV008','G04A01',70000,'Chưa sử dụng'),
 ('V010','DV009','G05A02',70000,'Đã hủy'),
 ('V011','DV009','G05B03',70000,'Đã hủy'),
-('V012','DV010','G06A03',70000,'Chưa sử dụng'),
+('V012','DV010','G06A03',70000,'Đã check-in'),
 ('V013','DV011','G03A04',70000,'Chưa sử dụng'),
 ('V014','DV012','G04A01',70000,'Chưa sử dụng'),
 ('V015','DV012','G04B02',70000,'Chưa sử dụng'),
-('V016','DV013','G05A02',70000,'Chưa sử dụng'),
+('V016','DV013','G05A02',70000,'Đã check-in'),
 ('V017','DV014','G03A03',70000,'Đã hủy'),
 ('V018','DV015','G06A04',70000,'Chưa sử dụng'),
 ('V019','DV015','G06B05',70000,'Chưa sử dụng'),
-('V020','DV016','G04A01',70000,'Chưa sử dụng'),
+('V020','DV016','G04A01',70000,'Đã check-in'),
 ('V021','DV017','G03A02',70000,'Chưa sử dụng'),
 ('V022','DV018','G05A03',70000,'Chưa sử dụng'),
 ('V023','DV018','G05B04',70000,'Chưa sử dụng'),
@@ -647,7 +646,7 @@ INSERT INTO VE (MaVe, MaDatVe, MaGhe, GiaVeTaiThoiDiemMua, TrangThaiVe) VALUES
 ('V025','DV020','G06A01',70000,'Chưa sử dụng'),
 ('V026','DV021','G05A02',70000,'Chưa sử dụng'),
 ('V027','DV021','G05B03',70000,'Chưa sử dụng'),
-('V028','DV022','G03A03',70000,'Chưa sử dụng'),
+('V028','DV022','G03A03',70000,'Đã check-in'),
 ('V029','DV023','G04A04',70000,'Chưa sử dụng');
 
 INSERT INTO MUA_KEM (MaDatVe, MaSanPham, SoLuong, DonGiaTaiThoiDiemMua) VALUES
@@ -673,11 +672,11 @@ INSERT INTO MUA_KEM (MaDatVe, MaSanPham, SoLuong, DonGiaTaiThoiDiemMua) VALUES
 
 INSERT INTO CHECK_IN (MaCheckIn, MaVe, MaNhanVien, ThoiGianCheckIn) VALUES
 ('CI001','V001','NV002','2026-10-20 09:05:00'),
-('CI002','V008','NV002','2026-10-23 13:05:00'),
-('CI003','V012','NV005','2026-10-21 16:05:00'),
-('CI004','V016','NV002','2026-10-24 11:05:00'),
-('CI005','V020','NV005','2026-10-22 14:05:00'),
-('CI006','V028','NV002','2026-10-23 12:05:00');
+('CI002','V008','NV002','2026-10-21 20:05:00'),
+('CI003','V012','NV005','2026-10-22 18:05:00'),
+('CI004','V016','NV002','2026-10-23 15:05:00'),
+('CI005','V020','NV005','2026-10-24 13:05:00'),
+('CI006','V028','NV002','2026-10-25 18:05:00');
 
 
 SELECT 'THE_LOAI' AS TenBang, COUNT(*) AS SoDong FROM THE_LOAI
@@ -745,12 +744,12 @@ ORDER BY TongDoanhThu DESC;
 
 -- 2. So ghe, so ve ban, ghe trong va ty le lap day
 SELECT sc.MaSuatChieu,p.TenPhim,pc.TenPhong,sc.ThoiGianBatDau,sc.ThoiGianKetThuc,
-       g.TongSoGhe,COALESCE(v.SoVeDaBan,0) AS SoVeDaBan,
-       GREATEST(g.TongSoGhe-COALESCE(v.SoVeDaBan,0),0) AS SoGheConTrong,
-       ROUND(100*COALESCE(v.SoVeDaBan,0)/NULLIF(g.TongSoGhe,0),2) AS TyLeLapDayPhanTram
+       pc.SucChuaToiDa AS TongSoGhe,
+       COALESCE(v.SoVeDaBan,0) AS SoVeDaBan,
+       GREATEST(pc.SucChuaToiDa-COALESCE(v.SoVeDaBan,0),0) AS SoGheConTrong,
+       ROUND(100*COALESCE(v.SoVeDaBan,0)/NULLIF(pc.SucChuaToiDa,0),2) AS TyLeLapDayPhanTram
 FROM SUAT_CHIEU sc JOIN PHIM p ON p.MaPhim=sc.MaPhim
 JOIN PHONG_CHIEU pc ON pc.MaPhong=sc.MaPhong
-JOIN (SELECT MaPhong,COUNT(*) AS TongSoGhe FROM GHE GROUP BY MaPhong) g ON g.MaPhong=sc.MaPhong
 LEFT JOIN (
   SELECT dv.MaSuatChieu,COUNT(v.MaVe) AS SoVeDaBan
   FROM DAT_VE dv JOIN VE v ON v.MaDatVe=dv.MaDatVe

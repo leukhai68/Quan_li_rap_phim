@@ -62,16 +62,13 @@ router.get('/lap-day-ghe', async (req, res) => {
     const [rows] = await db.execute(`
       SELECT sc.MaSuatChieu, p.TenPhim, pc.TenPhong,
              sc.ThoiGianBatDau, sc.ThoiGianKetThuc,
-             g.TongSoGhe,
+             pc.SucChuaToiDa AS TongSoGhe,
              COALESCE(v.SoVeDaBan, 0) AS SoVeDaBan,
-             GREATEST(g.TongSoGhe - COALESCE(v.SoVeDaBan, 0), 0) AS SoGheConTrong,
-             ROUND(100 * COALESCE(v.SoVeDaBan, 0) / NULLIF(g.TongSoGhe, 0), 2) AS TyLeLapDayPhanTram
+             GREATEST(pc.SucChuaToiDa - COALESCE(v.SoVeDaBan, 0), 0) AS SoGheConTrong,
+             ROUND(100 * COALESCE(v.SoVeDaBan, 0) / NULLIF(pc.SucChuaToiDa, 0), 2) AS TyLeLapDayPhanTram
       FROM SUAT_CHIEU sc
       JOIN PHIM p ON p.MaPhim = sc.MaPhim
       JOIN PHONG_CHIEU pc ON pc.MaPhong = sc.MaPhong
-      JOIN (
-        SELECT MaPhong, COUNT(*) AS TongSoGhe FROM GHE GROUP BY MaPhong
-      ) g ON g.MaPhong = sc.MaPhong
       LEFT JOIN (
         SELECT dv.MaSuatChieu, COUNT(v.MaVe) AS SoVeDaBan
         FROM DAT_VE dv

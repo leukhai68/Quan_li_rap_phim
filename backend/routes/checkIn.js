@@ -504,14 +504,6 @@ router.post('/xac-nhan', authenticateToken, requireRole('nhan_vien'), async (req
       [maCheckIn, maVe, maNhanVien, thoiGianCheckIn]
     );
 
-    // 5.1. Thưởng thêm 10.000 VNĐ vào Tổng Lương của nhân viên thực hiện check-in
-    await conn.execute(
-      `UPDATE NHAN_VIEN 
-       SET TongLuong = COALESCE(TongLuong, LuongCoBan) + 10000 
-       WHERE MaNhanVien = ?`,
-      [maNhanVien]
-    );
-
     // 6. Cập nhật trạng thái vé thành 'Đã check-in'
     await conn.execute(
       `UPDATE VE SET TrangThaiVe = 'Đã check-in' WHERE MaVe = ?`,
