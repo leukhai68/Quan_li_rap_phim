@@ -882,7 +882,15 @@
 
     function updateSnackQty(spId, delta) {
       const current = selectedSnacks[spId] || 0;
-      const next = Math.max(0, current + delta);
+      const sp = (availableProducts || []).find(p => p.MaSanPham === spId);
+      const maxStock = sp && typeof sp.SoLuongTonKho === 'number' ? sp.SoLuongTonKho : 99;
+
+      if (delta > 0 && current >= maxStock) {
+        alert(`⚠️ Sản phẩm "${sp ? sp.TenSanPham : spId}" chỉ còn lại ${maxStock} phần trong kho! Không thể chọn thêm.`);
+        return;
+      }
+
+      const next = Math.max(0, Math.min(maxStock, current + delta));
       selectedSnacks[spId] = next;
       const qtyEl = document.getElementById(`qty-${spId}`);
       if (qtyEl) qtyEl.textContent = next;

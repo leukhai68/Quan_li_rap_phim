@@ -160,8 +160,15 @@ router.post('/', authenticateToken, requireRole('khach_hang'), async (req, res) 
             await conn.rollback();
             return res.status(400).json({ success: false, message: `Sản phẩm ${sp.TenSanPham} hiện đã ngừng bán!` });
           }
-          const donGia = parseFloat(sp.DonGia);
           const soLuong = parseInt(item.soLuong, 10);
+          if (soLuong > sp.SoLuongTonKho) {
+            await conn.rollback();
+            return res.status(400).json({
+              success: false,
+              message: `Sản phẩm "${sp.TenSanPham}" chỉ còn lại ${sp.SoLuongTonKho} phần trong kho, không đủ số lượng yêu cầu (${soLuong})!`
+            });
+          }
+          const donGia = parseFloat(sp.DonGia);
           tongTienSanPham += donGia * soLuong;
           snackDetails.push({
             maSanPham: sp.MaSanPham,
